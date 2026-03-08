@@ -1,0 +1,1230 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>type.tv</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+        :root { --primary: #2563eb; --primary-dark: #1e40af; --secondary: #64748b; --success: #22c55e; --danger: #dc2626; --bg: #f8fafc; --card: #ffffff; --border: #e2e8f0; --text-main: #1e293b; }
+        * { box-sizing: border-box; }
+        body { font-family: 'Inter', sans-serif; background-color: var(--bg); color: var(--text-main); display: flex; justify-content: center; align-items: center; min-height: 100vh; margin: 0; padding: 20px; }
+        .app-container { background: var(--card); width: 100%; max-width: 900px; min-height: 780px; border-radius: 16px; box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1); display: flex; flex-direction: column; overflow: hidden; position: relative; }
+        .page { display: none; flex-grow: 1; padding: 30px; flex-direction: column; animation: fadeIn 0.3s ease-out; }
+        .page.active { display: flex; }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        .login-wrapper { margin: auto; text-align: center; width: 100%; max-width: 400px; }
+        .login-input { width: 100%; padding: 16px; border-radius: 8px; border: 2px solid var(--border); background: #f8fafc; font-size: 1.1rem; margin-bottom: 20px; text-align: center; }
+        .login-input:focus { border-color: var(--primary); outline: none; background: #fff; }
+        .btn { background: white; border: 2px solid var(--border); color: #334155; padding: 14px; border-radius: 8px; font-size: 1rem; font-weight: 600; cursor: pointer; transition: 0.2s; display: inline-flex; align-items: center; justify-content: center; gap: 8px; }
+        .btn:hover { border-color: var(--primary); color: var(--primary); transform: translateY(-1px); }
+        .btn-primary { background: var(--primary); color: white; border-color: var(--primary); }
+        .btn-primary:hover { background: var(--primary-dark); color: white; border-color: var(--primary-dark); }
+        .btn-danger { background: #fee2e2; color: var(--danger); border-color: #fecaca; }
+        .btn-danger:hover { background: var(--danger); color: white; border-color: var(--danger); }
+        .grid-menu { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin-bottom: 20px; }
+        .user-header { position: absolute; top: 20px; right: 20px; z-index: 10; display: flex; align-items: center; gap: 15px; font-size: 0.9rem; color: var(--secondary); background: rgba(255,255,255,0.95); padding: 6px 16px; border-radius: 20px; border: 1px solid var(--border); box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
+        .logout-link { color: var(--danger); cursor: pointer; font-weight: 600; }
+        .stats-card { background: #f8fafc; border-radius: 12px; padding: 20px; border: 1px solid #e2e8f0; margin-top: auto; }
+        .stats-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; }
+        .stats-title { font-size: 0.95rem; color: var(--text-main); font-weight: 700; text-transform: uppercase; }
+        .stats-tabs { display: flex; gap: 5px; margin-bottom: 15px; overflow-x: auto; padding-bottom: 5px; }
+        .stat-tab { padding: 6px 12px; border-radius: 20px; font-size: 0.8rem; font-weight: 600; cursor: pointer; border: 1px solid var(--border); background: white; color: var(--secondary); white-space: nowrap; transition: all 0.2s; }
+        .stat-tab.active { background: var(--primary); color: white; border-color: var(--primary); }
+        .stat-tab:hover:not(.active) { background: #e2e8f0; }
+        .quiz-row-1 { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; }
+        .quiz-user-badge { font-size: 0.9rem; font-weight: 600; color: var(--primary); background: #eff6ff; padding: 5px 12px; border-radius: 15px; }
+        .quiz-row-2 { margin-bottom: 15px; }
+        .progress-container { width: 100%; height: 8px; background: #e2e8f0; border-radius: 4px; overflow: hidden; }
+        .progress-fill { height: 100%; background: var(--primary); width: 0%; transition: width 0.3s; }
+        .quiz-row-3 { display: flex; justify-content: space-between; align-items: center; padding-bottom: 15px; border-bottom: 2px solid var(--border); margin-bottom: 20px; }
+        .question-counter { font-weight: 700; color: var(--secondary); font-size: 1rem; }
+        .question-text { font-size: 1.3rem; font-weight: 700; color: var(--text-main); margin-bottom: 25px; line-height: 1.6; }
+        .option-card { padding: 18px; border: 2px solid var(--border); border-radius: 10px; cursor: pointer; transition: 0.2s; font-size: 1.05rem; margin-bottom: 10px; background: white; color: #334155; position: relative; display: flex; align-items: center; }
+        .option-key-hint { display: inline-block; width: 24px; height: 24px; line-height: 24px; text-align: center; background: #e2e8f0; color: #64748b; border-radius: 4px; margin-right: 12px; font-size: 0.8rem; font-weight: bold; flex-shrink: 0; }
+        .option-card:hover { border-color: #94a3b8; background: #f1f5f9; }
+        .option-card.correct { background: #dcfce7; border-color: var(--success); color: #14532d; font-weight: 600; }
+        .option-card.incorrect { background: #fee2e2; border-color: var(--danger); color: #7f1d1d; }
+        .option-card.hint { border-color: var(--success); background: #f0fdf4; color: var(--success); font-weight: 600; }
+        .nav-buttons { display: flex; justify-content: space-between; margin-top: 25px; gap: 15px; }
+        .nav-btn { flex: 1; padding: 12px; border-radius: 8px; font-weight: bold; cursor: pointer; border: none; font-size: 1rem; }
+        .btn-prev { background: #e2e8f0; color: #475569; }
+        .btn-next { background: var(--primary-dark); color: white; }
+        .fast-access-container { margin-top: auto; border-top: 1px solid var(--border); padding-top: 20px; }
+        .fast-access-title { text-align: center; font-size: 0.85rem; color: var(--secondary); margin-bottom: 10px; }
+        .access-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(35px, 1fr)); gap: 6px; max-height: 150px; overflow-y: auto; padding: 5px; }
+        .access-btn { height: 35px; display: flex; align-items: center; justify-content: center; background: #f1f5f9; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 0.85rem; font-weight: 500; color: #64748b; cursor: pointer; transition: all 0.1s; }
+        .access-btn:hover { background: #e2e8f0; }
+        .access-btn.current { border: 2px solid #0f172a; color: #0f172a; font-weight: 800; background: white; transform: scale(1.05); }
+        .access-btn.correct { background: var(--success); color: white; border-color: var(--success); }
+        .access-btn.incorrect { background: var(--danger); color: white; border-color: var(--danger); }
+        .switch { position: relative; display: inline-block; width: 44px; height: 24px; }
+        .switch input { display:none; }
+        .slider { position: absolute; cursor: pointer; top:0; left:0; right:0; bottom:0; background-color: #cbd5e1; transition:.3s; border-radius: 34px; }
+        .slider:before { position: absolute; content:""; height: 18px; width: 18px; left: 3px; bottom: 3px; background-color: white; transition:.3s; border-radius: 50%; }
+        input:checked + .slider { background-color: var(--success); }
+        input:checked + .slider:before { transform: translateX(20px); }
+        .switch-label { font-size: 0.9rem; color: var(--secondary); font-weight: 600; margin-right: 10px; }
+        .score-circle { width: 150px; height: 150px; border-radius: 50%; background: transparent; display: flex; flex-direction: column; justify-content: center; align-items: center; margin: 0 auto 20px; font-size: 2.2rem; font-weight: 800; color: var(--text-main); border: 10px solid #e2e8f0; }
+        .score-circle.good { border-color: var(--success); color: var(--success); }
+        .score-circle.bad { border-color: var(--danger); color: var(--danger); }
+        .score-label { font-size: 0.8rem; font-weight: 600; text-transform: uppercase; color: #64748b; margin-top: 5px; }
+        .access-grid::-webkit-scrollbar { width: 6px; }
+        .access-grid::-webkit-scrollbar-track { background: #f1f1f1; }
+        .access-grid::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 3px; }
+        @media screen and (max-width: 768px) {
+            body { padding: 0 !important; background-color: white; }
+            .app-container { width: 100%; max-width: 100%; border: none; border-radius: 0; box-shadow: none; padding: 10px 12px; min-height: 100vh; }
+            .page { padding: 0; }
+            .question-text { font-size: 0.9rem !important; line-height: 1.35; font-weight: 600; margin-bottom: 12px; color: #0f172a; }
+            .option-card { font-size: 0.85rem !important; padding: 8px 10px; margin-bottom: 6px; border-radius: 6px; min-height: auto; }
+            .option-key-hint { width: 18px; height: 18px; line-height: 18px; font-size: 0.7rem; margin-right: 6px; }
+            h1 { font-size: 1.2rem !important; margin-top: 5px; margin-bottom: 5px; }
+            h2 { font-size: 1rem !important; margin-bottom: 10px; }
+            .btn { font-size: 0.8rem; padding: 8px; height: auto; }
+            .grid-menu { gap: 8px; grid-template-columns: 1fr; }
+            .nav-buttons { margin-top: 15px; gap: 10px; }
+            .nav-btn { font-size: 0.8rem; padding: 8px; }
+            .stat-tab { padding: 4px 8px; font-size: 0.7rem; }
+            .user-header { position: relative; top: 0; right: 0; margin-bottom: 10px; justify-content: flex-end; border: none; background: none; box-shadow: none; padding: 0; }
+            #quiz-title { font-size: 0.85rem !important; font-weight: 700 !important; max-width: 50%; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        }
+    </style>
+</head>
+<body>
+<div class="app-container">
+    <div id="user-info-panel" class="user-header" style="display: none;">
+        <span>👤 <b id="display-username">Misafir</b></span>
+        <span class="logout-link" onclick="logout()">Çıkış</span>
+    </div>
+    <div id="page-login" class="page active">
+        <div class="login-wrapper">
+            <h1 style="color: var(--primary); margin-bottom: 10px;">type.tv</h1>
+            <p style="color: var(--secondary); margin-bottom: 30px;">Lütfen giriş yapın</p>
+            <input type="text" id="username-input" class="login-input" placeholder="Adınız">
+            <button class="btn btn-primary" style="width:100%" onclick="login()">Giriş Yap</button>
+        </div>
+    </div>
+    <div id="page-menu" class="page">
+        <h2 style="color: #1e293b; margin-bottom: 20px;">Dersler</h2>
+        <div style="text-align: center; margin-bottom: 20px; font-weight: 600; color: #475569; background: #f1f5f9; padding: 10px; border-radius: 8px;">
+        🏆 Çözülen Soru: <span id="total-solved-display" style="color: var(--primary); font-size: 1.1rem; margin-right:5px;">0</span>
+        <span style="color:#cbd5e1">|</span>
+        ✅ Başarı Oranı: <span id="success-rate-display" style="color: var(--success); font-size: 1.1rem; margin-left:5px;">%0</span>
+        </div>
+        <div class="grid-menu" id="dersler-menusu">
+            <button class="btn" onclick="startQuiz('apu')">⚙️ APU</button>
+            <button class="btn" onclick="startQuiz('communication')">📻 Communication</button>
+            <button class="btn" onclick="startQuiz('doors')">🚪 Doors</button>
+            <button class="btn" onclick="startQuiz('flight_controls')">✈️ Flight Controls</button>
+            <button class="btn" onclick="startQuiz('fire_protection')">🔥 Fire Protection</button>
+            <button class="btn" onclick="startQuiz('fuel')">⛽ Fuel</button>
+            <button class="btn" onclick="startQuiz('ice_and_rain')">❄️ Ice and Rain</button>
+            <button class="btn" onclick="startQuiz('indication')">🖥️ Indication / Recording</button>
+            <button class="btn" onclick="startQuiz('landing_gear')">🛬 Landing Gear</button>
+            <button class="btn" onclick="startQuiz('lights')">💡 Lights</button>
+            <button class="btn" onclick="startQuiz('oxygen')">🤿 Oxygen & Emergency</button>
+        </div>
+        <button class="btn btn-primary" style="width: 100%; margin-bottom: 20px;" onclick="startQuiz('mix')">🔀 Tüm Dersleri Karıştır</button>
+        <div class="stats-card">
+            <div class="stats-header">
+                <div class="stats-title">📊 HATA ANALİZİ</div>
+            </div>
+            <div class="stats-tabs" id="hata-sekmeleri">
+                <div class="stat-tab active" onclick="switchMistakeTab('all', this)">GENEL</div>
+                <div class="stat-tab" onclick="switchMistakeTab('apu', this)">APU</div>
+                <div class="stat-tab" onclick="switchMistakeTab('communication', this)">COMM.</div>
+                <div class="stat-tab" onclick="switchMistakeTab('doors', this)">DOORS</div>
+                <div class="stat-tab" onclick="switchMistakeTab('flight_controls', this)">FLIGHT CONT.</div>
+                <div class="stat-tab" onclick="switchMistakeTab('fire_protection', this)">FIRE PROT.</div>
+                <div class="stat-tab" onclick="switchMistakeTab('fuel', this)">FUEL</div>
+                <div class="stat-tab" onclick="switchMistakeTab('ice_and_rain', this)">ICE & RAIN</div>
+                <div class="stat-tab" onclick="switchMistakeTab('indication', this)">INDICATION</div>
+                <div class="stat-tab" onclick="switchMistakeTab('landing_gear', this)">LANDING GEAR</div>
+                <div class="stat-tab" onclick="switchMistakeTab('lights', this)">LIGHTS</div>
+                <div class="stat-tab" onclick="switchMistakeTab('oxygen', this)">OXYGEN</div>
+            </div>
+
+            
+            <div id="mistake-stats" style="display:flex; gap:10px; flex-wrap:wrap; min-height: 50px; align-items: center;">
+                <span style="color:#94a3b8; font-size:0.9rem;">Yükleniyor...</span>
+            </div>
+        </div>
+    </div>
+    <div id="page-quiz" class="page">
+        <div class="quiz-row-1">
+            <button onclick="endQuiz()" style="background:none; border:none; color:#94a3b8; font-weight:bold; cursor:pointer; font-size: 0.9rem;">✕ Çık</button>
+            <span id="quiz-title" style="font-weight: 800; color: var(--text-main); font-size: 1rem; text-align: center;">Test Adı</span>
+            <div class="quiz-user-badge">👤 <span id="display-username-quiz">Kullanıcı</span></div>
+        </div>
+        <div class="quiz-row-2">
+            <div class="progress-container"><div class="progress-fill" id="q-progress"></div></div>
+        </div>
+        <div class="quiz-row-3">
+            <span class="question-counter" id="q-counter">Soru 1/10</span>
+            <div style="font-weight: 800; color: var(--primary); font-size: 1.1rem; background: #eff6ff; padding: 4px 12px; border-radius: 8px; border: 1px solid #bfdbfe;">⏱️ <span id="quiz-timer">00:00</span></div>
+            <div style="display:flex; align-items:center;">
+                <span class="switch-label">Otomatik Geç</span>
+                <label class="switch">
+                    <input type="checkbox" id="auto-next" checked>
+                    <span class="slider"></span>
+                </label>
+            </div>
+        </div>
+        <div class="question-text" id="q-text">Yükleniyor...</div>
+        <div id="q-options"></div>
+        <div class="nav-buttons">
+            <button class="nav-btn btn-prev" id="btn-prev" onclick="prevQuestion()">← Önceki</button>
+            <button class="nav-btn btn-next" id="btn-next" onclick="nextQuestion()">Sonraki →</button>
+        </div>
+        <div class="fast-access-container">
+            <div class="fast-access-title">Hızlı Erişim</div>
+            <div class="access-grid" id="fast-access-grid"></div>
+        </div>
+    </div>
+    <div id="page-result" class="page">
+        <div style="margin: auto; text-align: center;">
+            <h3 id="res-test-title" style="margin-bottom: 20px; color: var(--primary-dark); font-weight: 800;">Test Adı</h3>
+            <div class="score-circle" id="result-circle">
+                <span id="res-score">%0</span>
+                <span class="score-label">BAŞARI</span>
+            </div>
+            <h2 id="res-msg">Sonuç</h2>
+            <p style="color:var(--secondary); margin-bottom:5px;">Sonuçlar analiz edildi.</p>
+            <p style="color:#0f172a; font-weight:bold; font-size: 1.1rem; margin-bottom:30px; background: #f8fafc; padding: 10px; border-radius: 8px; display: inline-block; border: 1px solid var(--border);">⏱️ Tamamlama Süresi: <span id="res-time-display" style="color:var(--primary)">00:00</span></p>
+            <div style="display:flex; flex-direction:column; gap:15px; max-width:400px; margin:0 auto;">
+                <button id="btn-retry-session" class="btn btn-danger" style="display:none;" onclick="retrySessionMistakes()">⚠️ Bu Testteki Yanlışları Çöz</button>
+                <button class="btn btn-primary" onclick="restartQuiz()">🔄 Aynı Testi Tekrarla</button>
+                <button class="btn" onclick="goBackToMenu()">🏠 Menüye Dön</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    let returnPageId = 'page-menu'; 
+    let currentQuizTitle = ''; 
+    
+    // --- VERİ HAVUZU ---
+    const courseData = {
+        apu: [
+            { q: "What are the APU manual shut down possibilities in the cockpit?", options: ["APU master switch and APU fire push button.", "APU master switch only.", "APU fire push button and APU shut off push button."], answer: "APU master switch and APU fire push button." },
+            { q: "When the APU is running, APU fuel pump:", options: ["Runs when tank pumps pressure is not sufficient.", "Runs all the time.", "Runs only in flight.", "Runs when the apu fuel pump is selected on."], answer: "Runs when tank pumps pressure is not sufficient." },
+            { q: "The normal APU rotation speed (N%) with or without bleed system demand and on ground or airbourne:", options: ["Always 100%", "Steady at 99%", "Steady at 101 %"], answer: "Always 100%" },
+            { q: "Apu master switch selected on:", options: ["On comes on blue. APU system is supplied and apu starts at 95 %, avail comes on.", "On comes on blue...APU system is supplied...APU starts as soon as the start push botton is pressed and intake flap opens."], answer: "On comes on blue...APU system is supplied...APU starts as soon as the start push botton is pressed and intake flap opens." },
+            { q: "APU bleed air is monitored by:", options: ["By ECB", "Not controlled.", "By APU bleed valve which operates as shut off valve ."], answer: "By ECB" },
+            { q: "APU N indication becomes red on ECAM SD, when :", options: ["N ≥ 102 %.", "N ≥ 107 %.", "N ≥ 99 %"], answer: "N ≥ 107 %." },
+            { q: "APU EGT indication becomes red on ECAM SD , when :", options: ["15 10 P runnin P runnin", "700 ºC-742 ºC, depending on the ambient temperature"], answer: "700 ºC-742 ºC, depending on the ambient temperature" },
+            { q: "On ground , APU provides:", options: ["Elec power + hydraulic power.", "Elec power + bleed air"], answer: "Elec power + bleed air" },
+            { q: "Air bleed extraction for wing anti-ice : REF: FCOM VOL.1 1.30.20 PAGE 1", options: ["Is permitted.", "Is not permitted."], answer: "Is not permitted." },
+            { q: "Can you start the APU using the A/C batteries:", options: ["YES", "NO"], answer: "YES" },
+            { q: "The APU fuel is suplied from the:", options: ["Left fuel feed line.", "Right fuel feed line."], answer: "Left fuel feed line." },
+            { q: "If air bleed was used, after a manual shut down sequence the APU:", options: ["Stops immediately.", "Keeps running for four minutes.", "Keeps running for a cooling period 120 sec ."], answer: "Keeps running for a cooling period 120 sec ." },
+            { q: "Avail light illuminates on start PB when :", options: ["External power is disconnected.", "APU N is above 99.5% or 2 sec after reaching 95%.", "APU electric power is used."], answer: "APU N is above 99.5% or 2 sec after reaching 95%." },
+            { q: "The APU has its own lubrication system:", options: ["YES", "NO"], answer: "YES" },
+            { q: "On ground ,the APU speed is determined in accordance with air bleed system demand by :", options: ["Electronic control box", "Air conditioning system (zone controller)", "Air intake system"], answer: "Electronic control box" },
+            { q: "Besides the master switch on the cockpit APU panel, APU shut down is possible by", options: ["Switching off the left fuel pumps.", "Pushing the APU fire push button.", "Pressing APU shut off push button on external interphone panel", "Either B or C"], answer: "Either B or C" },
+            { q: "When the APU master switch is released out, a normal APU shut down occurs: [fcom değişti]", options: ["After a time delay, in all cases.", "After a time delay if the APU bleed air was in use.", "Without time delay, in all cases."], answer: "After a time delay, in all cases." },
+            { q: "APU Master switch on, the :", options: ["APU starts.", "ECB is electrically supplied.", "Air intake flap closes."], answer: "ECB is electrically supplied." },
+            { q: "Please answer based on the given image:", img: "annexes/apu/apu_annex1.png", options: ["A", "B", "C", "D"], answer: "C" },
+            { q: "Please answer based on the given image:", img: "annexes/apu/apu_annex2.png", options: ["A", "B"], answer: "A" },
+            { q: "Please answer based on the given image:", img: "annexes/apu/apu_annex3.png", options: ["A", "B", "C"], answer: "B" },
+            { q: "Please answer based on the given image:", img: "annexes/apu/apu_annex4.png", options: ["A", "B", "C"], answer: "B" },
+            { q: "Please answer based on the given image:", img: "annexes/apu/apu_annex5.png", options: ["A", "B", "C", "D"], answer: "C" },
+            { q: "Please answer based on the given image:", img: "annexes/apu/apu_annex6.png", options: ["A", "B", "C", "D"], answer: "C" },
+            { q: "Please answer based on the given image:", img: "annexes/apu/apu_annex7.png", options: ["A", "B", "C", "D"], answer: "B" },
+            { q: "Please answer based on the given image:", img: "annexes/apu/apu_annex8.png", options: ["A", "B", "C", "D"], answer: "A" },
+            { q: "Please answer based on the given image:", img: "annexes/apu/apu_annex9.png", options: ["A", "B"], answer: "A" },
+            { q: "Please answer based on the given image:", img: "annexes/apu/apu_annex10.png", options: ["A", "B"], answer: "A" },
+            { q: "Please answer based on the given image:", img: "annexes/apu/apu_annex11.png", options: ["A", "B"], answer: "A" }
+        ],
+        communication: [
+            { q: "In normal operation, RMP1 is dedicated to :", options: ["HF 1 and HF 2.", "VHF 1", "VHF 2", "HF 1"], answer: "VHF 1" },
+            { q: "If you select VHF 2 on RMP 1, the SEL light illuminates on :", options: ["RMP 1 only.", "RMP 2 only.", "RMP 1 and RMP 2"], answer: "RMP 1 and RMP 2" },
+            { q: "To activate the voice recorder before engine start you have to press :", options: ["The ground control push button.", "The CVR erase push button.", "The CVR test push button."], answer: "The ground control push button." },
+            { q: "By pressing the mech transmission key on the audio control panel (ACP) REF: FCOM 1-23-20 PAGE 9", options: ["You can speak to ground mech through the handset.", "You can speak to ground mech VIA the audio control panel interphone push button.", "You are one line with ground mech VIA the audio control panel cabin push button."], answer: "You can speak to ground mech VIA the audio control panel interphone push button." },
+            { q: "TO erase CVR recording :", options: ["You push the erase push button once.", "You push the erase push button for 2 seconds in flight.", "You push the erase button on the ground for more than 2 seconds and check that the parking brake is on."], answer: "You push the erase button on the ground for more than 2 seconds and check that the parking brake is on." },
+            { q: "Interphone system permits you to speak to :", options: ["The cabin attendants.", "All occupants in the cockpit.", "The mechanic on the ground.", "All the above."], answer: "All the above." },
+            { q: "Can you obtain a amplitude modulation green 'AM' light on RMP 2 :", options: ["Yes.", "No."], answer: "Yes." },
+            { q: "How do you receive ATIS information using the vor ?", options: ["Selecting on VOICE push button on the audio control panel and vor reception KNOB.", "Selecting VOICE push button only."], answer: "Selecting on VOICE push button on the audio control panel and vor reception KNOB." },
+            { q: "How do you cancel the green on voice light ?", options: ["BY pressing the on voice push button again.", "By pressing the vor reception push button.", "Both."], answer: "BY pressing the on voice push button again." },
+            { q: "What is the function of the reset push button on the audio control panel (ACP) ?", options: ["To restart system operation.", "To cancel the previous selections.", "To cancel any lighted calls."], answer: "To cancel any lighted calls." },
+            { q: "When using the OXY mask or boom headset, if the INT/RAD key is set to INT.Will the interphone background noise be heard when using the sidestick press to talk for radio transmissions ?", options: ["Yes.", "No."], answer: "No." },
+            { q: "You make a STBY/NAV selection on a pedestal RMP. Can you confirm that selection on MCDU-RAD/NAV page :", options: ["Yes.", "No."], answer: "No." },
+            { q: "Is STBY/NAV tuning possible on RMP-3 :", options: ["Yes.", "No"], answer: "No" },
+            { q: "Can you hear the beacon identification selected through the STBY/NAV", options: ["Yes, by pressing corresponding reception KNOB.", "Yes, by pressing a LSK on the MCDU."], answer: "Yes, by pressing corresponding reception KNOB." },
+            { q: "Can you hear the voice recorder test signal through the cockpit loudspeakers, with the parking brake released :", options: ["Yes.", "No."], answer: "No." },
+            { q: "IF RMP 2 fails :", options: ["All com system can be controlled by any other RMP.", "Only VHF 2 frequences can not be controlled.", "The whole system is inoperative.", "VHF 2 and HF 2 frequences can not be controlled."], answer: "All com system can be controlled by any other RMP." },
+            { q: "You receive a SELCAL on VHF 2, what happens on your audio control panel :", options: ["Amber sign call flashes on VHF 2 key.", "Three green bars come on.", "White SELCAL appears on VHF 2 P/B ABD VHF 2 reception selector illuminates white."], answer: "Amber sign call flashes on VHF 2 key." },
+            { q: "Can you speak on VHF and the passenger address at the same time :", options: ["Never.", "Yes by pressing the RAD toggle switch and the passenger address key.", "Yes by using the stick press to talk command and the passenger address key."], answer: "Never." },
+            { q: "When you select CAPT 3 on the audio switching panel :", options: ["The captain uses the 3 RD occupant headset.", "The 3 RD occupant uses captain equipment.", "The captain uses his acoustic equipment and the 3rd occupant ACP"], answer: "The captain uses his acoustic equipment and the 3rd occupant ACP" },
+            { q: "Can you select VOR 2 frequency with RMP 1.", options: ["Yes.", "No."], answer: "No." },
+            { q: "If VHF 1 is select on RMP 2, the SEL light illuminates :", options: ["On RMP 2", "On RMP 1", "On RMP 1 and RMP 2"], answer: "On RMP 1 and RMP 2" },
+            { q: "If RMP 1 fails, the crew can only use RMP 2 : SORU YANLIŞ I ARTILACA", options: ["By switching OFF RMP 1, then using RMP 2.", "By using the overhead panel audio switching : CAPT 3."], answer: "By switching OFF RMP 1, then using RMP 2." },
+            { q: "In case of dual FMGC failure, selection of radio navigation frequencies is possible with :", options: ["RMP 1 only.", "RMP 1 and 2 only.", "RMP 1, 2 and 3."], answer: "RMP 1 and 2 only." },
+            { q: "For communication with the ground mechanic at the engine nacelle the crew must the following audio system selection :", options: ["Mechanic (MECH) + interphone (INT).", "Attendant (ATT) + cabin (CAB).", "Any of the above."], answer: "Attendant (ATT) + cabin (CAB)." },
+            { q: "The cockpit voice recorder is energized, on ground as soon as the aircraft electrical network is supplied but only for 5 minutes.It starts again as soon as:", options: ["GND CTL is on.", "One engine is running.", "A or B."], answer: "A or B." },
+            { q: "If one RMP fails, the remaining one controls all the VHF trancievers :", options: ["Yes.", "No."], answer: "Yes." },
+            { q: "What is the main purpose of the RMP :", options: ["To select radio frequencies.", "To select NAV aids when the MCDU has failed.", "Both."], answer: "Both." },
+            { q: "Can you use service interphone system in flight :", options: ["Yes.", "No."], answer: "Yes." },
+            { q: "If the ATC mode selector is set to AUTO : COM değişti", options: ["Selected ATC operates only in flight.", "Selected ATC operates when flex or toga power is selected for T.O", "Selected ATC operates as soon as one engine is running."], answer: "Selected ATC operates only in flight." },
+            { q: "On ATC control panel, the fault light comes ON if :", options: ["Selected transponder fails.", "System 1 or 2 has failed."], answer: "Selected transponder fails." },
+            { q: "On RMP, the ON/OFF switch controls :", options: ["The power supply to the RMP.", "Only the STBY NAV function of RMP.", "Only the COM function of RMP."], answer: "The power supply to the RMP." },
+            { q: "STBY NAV has been selected by using of NAV key :", options: ["VHF function is lost on this RMP.", "VHF is still available but only the last frequency selected can be used.", "NAV key has no effect on radio COM frequency selection."], answer: "NAV key has no effect on radio COM frequency selection." },
+            { q: "EVACUATION COMMAND BUTTON AT THE FORWARD FLIGHT ATTENDANT POSITION", options: ["CAN ONLY BE ACTIVATED, PROVIDED THE COCKPIT SWITCH IS AT THE CAPT AND PURS POSITION", "CAN BE ACTIVATED AT ANY TIME", "CAN ONLY BE ACTIVATED ON GROUND", "OVERRIDES ALL OTHER SIGNALS"], answer: "CAN ONLY BE ACTIVATED, PROVIDED THE COCKPIT SWITCH IS AT THE CAPT AND PURS POSITION" },
+            { q: "WHERE ARE THE EVAC SIGNALS COMMAND PUSH BUTTON SWITCHES INSTALLED ?", options: ["IN THE COCKPIT AND NEXT TO EACH CABIN DOOR", "IN THE COCKPIT OVERHEAD PANEL ONLY", "ON THE OVERHEAD PANEL AND AT THE PURSER STATION"], answer: "ON THE OVERHEAD PANEL AND AT THE PURSER STATION" },
+            { q: "IS THE ALERT ACTIVE WHEN THE COMMAND PUSH BUTTON ON THE EVAC PURSER PANEL IS PRESSED ?", options: ["YES, AT ANY TIME", "YES, BUT ONLY ON GROND", "YES, PROVIDED THE COCKPIT EVAC SWITCH IS IN THE CAPT AND PURS POSITION", "YES, IT OVERRIDES ALL OTHER SIGNALS"], answer: "YES, PROVIDED THE COCKPIT EVAC SWITCH IS IN THE CAPT AND PURS POSITION" },
+            
+            // --- ANNEX SORULARI ---
+            { q: "Please answer based on the given image:", img: "annexes/communication/communication_annex1.png", options: ["A", "B", "C"], answer: "A" },
+            { q: "Please answer based on the given image:", img: "annexes/communication/communication_annex2.png", options: ["A", "B", "C", "D"], answer: "A" },
+            { q: "Please answer based on the given image:", img: "annexes/communication/communication_annex3.png", options: ["A", "B", "C", "D"], answer: "D" },
+            { q: "Please answer based on the given image:", img: "annexes/communication/communication_annex4.png", options: ["A", "B"], answer: "B" },
+            { q: "Please answer based on the given image:", img: "annexes/communication/communication_annex5.png", options: ["A", "B"], answer: "A" },
+            { q: "Please answer based on the given image:", img: "annexes/communication/communication_annex6.png", options: ["A", "B", "C"], answer: "C" },
+            { q: "Please answer based on the given image:", img: "annexes/communication/communication_annex7.png", options: ["A", "B"], answer: "B" },
+            { q: "Please answer based on the given image:", img: "annexes/communication/communication_annex8.png", options: ["A", "B", "C", "D"], answer: "C" },
+            
+            // --- 44'TEN SONRA DEVAM EDEN SORULAR ---
+            { q: "Communications radios are controlled", options: ["from any one of the three audio control panels (ACPs).", "by the F/O", "from any one of the three radio management panels (RMPs)."], answer: "from any one of the three radio management panels (RMPs)." },
+            { q: "The loudspeaker volume knob will control the loudness of the aural alert and voice messages.", options: ["True", "False"], answer: "False" },
+            { q: "Only_____ is functional in the EMER ELEC CONFIG", options: ["RMP 3", "RMP 1", "RMP 1 and 3"], answer: "RMP 1" },
+            { q: "The Flight Deck Voice Recorder will record on the ground hatalı soru şaşırtıyor", options: ["automatically for five minutes after electrical power is supplied to the airplane", "when at least one engine is operating", "when the DFDR pushbutton on the pedestal is pressed", "Both A & B are correct", "Both B & C are correct"], answer: "Both A & B are correct" },
+            { q: "When using the boom microphone, oxygen mask microphone, or hand microphone, the PA button must be pressed and held to use the PA system", options: ["True", "False"], answer: "True" },
+            { q: "The SEL indicator on a Radio Management Panel illuminates when", options: ["the RMP has failed", "a transceiver associated with one RMP is tuned by another RMP", "the SELCAL system has detected an incoming call"], answer: "a transceiver associated with one RMP is tuned by another RMP" },
+            { q: "With the INT/RAD switch on an Audio Control Panel in the INT position and the sidestick Transmit Switch in the RADIO (keyed) position, you will transmit on the soru şaşırtıyor iptal", options: ["interphone at all times when using the boom or oxygen mask microphone", "interphone except when using the boom or oxygen mask microphone", "radio selected by its transmission key on the Audio Control Panel.", "radio selected by its reception knob on the Audio Control Panel"], answer: "radio selected by its transmission key on the Audio Control Panel." },
+            { q: "The loudspeaker volume knob will control the loudness of the aural alert and voice messages. SORU İLE AYNI", options: ["True", "False"], answer: "False" },
+            { q: "The Flight Deck Handset is used for communication", options: ["between the flight deck and flight attendants", "between the flight deck and ground personnel", "from the flight deck to the PA", "on any transmission channel selected by the transmission key on ACP 1"], answer: "from the flight deck to the PA" },
+            { q: "The Digital Flight Data Recorder", options: ["stops immediately after touchdown when the main landing gear is fully compressed", "operates continuously as long as the aircraft is electrically powered", "operates continuously in flight whether or not the engines are running", "operates continuously as soon as the DFDR EVENT pushbutton on the pedestal is pressed"], answer: "operates continuously in flight whether or not the engines are running" },
+            { q: "Pressing the CVR ERASE pushbutton for two seconds erases the Cockpit Voice Recorder tape completely if:", options: ["the aircraft is on the ground", "the parking brake is set", "both A and B", "either A or B"], answer: "both A and B" },
+            { q: "When the captain selects the EMER pushbutton ON on the CALLS panel, all of the following occur EXCEPT:", options: ["a pink light flashes at all area CALL panels in the cabin", "EMERGENCY CALL appears on all flight attendant panels", "three long buzzers sound on the flight deck", "a high-low chime (repeated three times) sounds through all loudspeakers"], answer: "three long buzzers sound on the flight deck" },
+            { q: "Which statement concerning the NAV key on the RMP is NOT correct", options: ["NAV is pressed only when both FMGCs or both MCDUs inoperative", "Pressing the NAV key on RMP #3 has no effect", "Normal radio communication is still available", "Normal autotuning of navaids is still available"], answer: "Normal autotuning of navaids is still available" }
+        ],
+        doors: [
+            { q: "THE COCKPIT DOOR : soru yanlış", options: ["CAN ONLY OPEN INTO THE COCKPIT", "CAN ONLY OPEN INTO THE CABIN", "NORMALLY OPENS INTO THE COCKPIT BUT CAN BE FORCED OPEN IN EITHER DIRECTION"], answer: "NORMALLY OPENS INTO THE COCKPIT BUT CAN BE FORCED OPEN IN EITHER DIRECTION" },
+            { q: "AT THE GATE, A RED LIGHT FLASHES UNDER THE DOOR WINDOW WHEN :", options: ["SLIDE IS ARMED AND ENGINES ARE RUNNING", "ENGINES ARE STOPPED, SLIDE IS DISARMED AND CABIN IS PRESSURIZED", "ENGINES ARE RUNNING AND SLIDE IS DISARMED"], answer: "ENGINES ARE STOPPED, SLIDE IS DISARMED AND CABIN IS PRESSURIZED" },
+            { q: "HOW MANY ESCAPE ROPES ARE THERE IN THE COCKPIT ?", options: ["2 ESCAPE ROPES-1 OVER EACH WINDOW THAT CAN BE USED THROUGH THE LEFT OR RIGHT WINDOW", "2 ESCAPE ROPES-EACH OF THEM MUST BE USED THROUGH THE WINDOW TO WHICH IT CORRESPONDS", "3 ESCAPE ROPES FOR THE 2 COCKPIT CREW MEMBERS, THE EXTRA ONE IS TO BE USED BY SOME PARTICULARLY BIG PEOPLE"], answer: "2 ESCAPE ROPES-1 OVER EACH WINDOW THAT CAN BE USED THROUGH THE LEFT OR RIGHT WINDOW" },
+            
+            // --- ANNEX SORULARI ---
+            { q: "Please answer based on the given image:", img: "annexes/doors/doors_annex1.png", options: ["A", "B", "C", "D"], answer: "C" },
+            { q: "Please answer based on the given image:", img: "annexes/doors/doors_annex2.png", options: ["A", "B"], answer: "B" },
+            { q: "Please answer based on the given image:", img: "annexes/doors/doors_annex3.png", options: ["A", "B"], answer: "A" },
+            { q: "Please answer based on the given image:", img: "annexes/doors/doors_annex4.png", options: ["A", "B", "C", "D"], answer: "A" },
+            { q: "Please answer based on the given image:", img: "annexes/doors/doors_annex5.png", options: ["A", "B", "C"], answer: "B" },
+            { q: "Please answer based on the given image:", img: "annexes/doors/doors_annex6.png", options: ["A", "B", "C", "D"], answer: "C" },
+            { q: "Please answer based on the given image:", img: "annexes/doors/doors_annex7.png", options: ["A", "B"], answer: "B" },
+            { q: "Please answer based on the given image:", img: "annexes/doors/doors_annex8.png", options: ["A", "B", "C"], answer: "C" },
+            { q: "Please answer based on the given image:", img: "annexes/doors/doors_annex9.png", options: ["A", "B", "C", "D"], answer: "B" }
+        ],
+        flight_controls: [
+            // --- İLK METİN SORULARI (1-41) ---
+            { q: "The pitch direct law is :", options: ["A load factor demand with no protection.", "A direct side stick to elevator relationship", "A direct side stick to elevator relationship with autotrim operation.", "Achieved through the THS using manual trim control."], answer: "A direct side stick to elevator relationship" },
+            { q: "Flight control computers are:", options: ["2 ELAC's - 2 SEC's - 3 FAC's.", "2 ELAC's - 3 SEC's - 2 FAC's.", "3 ELAC's - 3 SEC's - 2 FAC's."], answer: "2 ELAC's - 3 SEC's - 2 FAC's." },
+            { q: "Which surfaces are used for lift dumping ?", options: ["All spoilers", "Spoilers 1 to 3", "Spoilers 1 to 4"], answer: "All spoilers" },
+            { q: "If ELAC 2 and 1 have failed:", options: ["The elevator and pitch trim are controlled by SEC 1 or 2.", "Pitch control is provided by the FAC's", "Pitch control can only be achieved from the trim wheel"], answer: "The elevator and pitch trim are controlled by SEC 1 or 2." },
+            { q: "If FAC 1 and 2 have failed:", options: ["The rudder can always be controlled from the pedals.", "The rudder control is lost.", "The rudder control is provided by SEC 3."], answer: "The rudder can always be controlled from the pedals." },
+            { q: "Elevators, ailerons, spoilers are:", options: ["Hydraulically actuated and mechanically controlled.", "Electrically actuated and hydraulically controlled.", "Hydraulically actuated and electrically controlled."], answer: "Hydraulically actuated and electrically controlled." },
+            { q: "Rudder control is electrical for yaw damping and trim :", options: ["YES", "NO"], answer: "YES" },
+            { q: "Which statement is correct?", options: ["Ground spoiler function :all spoilers deploy.", "Speed brake function :spoilers 1.2.3. deploy.", "Roll function :ailerons + spoilers 4 and 5 deploy."], answer: "Ground spoiler function :all spoilers deploy." },
+            { q: "How many control modes are there for the elevator servo jacks ?", options: ["2 modes: active and dumping", "3 modes: active, dumping and centering", "1 mode: active"], answer: "3 modes: active, dumping and centering" },
+            { q: "What are the load factor limitations?", options: ["+2.5 G to -1 G for clean configuration", "+2 G to 0 for other configurations", "A and B"], answer: "A and B" },
+            { q: "Which ELAC normally controls the elevators and the horizontal stabilizer ?", options: ["ELAC 1", "ELAC 2"], answer: "ELAC 2" },
+            { q: "Is it possible to lose control of the THS ?", options: ["In case of both yellow and green hydraulic system failure", "Never lost, always available manually for mechanical back up", "In case both blue and yellow hydraulic system failure", "In case of loss of both FAC 1 and 2"], answer: "In case of both yellow and green hydraulic system failure" },
+            { q: "How many hydraulic motors drİve the screw jack of the stabilizer : gereksiz zor soru", options: ["2", "3"], answer: "2" },
+            { q: "How many electric motors can control the hydraulic motor of the stabilizer: gereksiz zor soru", options: ["1", "2", "3"], answer: "3" },
+            { q: "If neither ELAC 2 nor ELAC 1 are available, pitch control is automatically transfered to :", options: ["SEC 1 or SEC 2", "SEC 1 or SEC 3", "SEC 3"], answer: "SEC 1 or SEC 2" },
+            { q: "In normal law, flight mode changes to the flare mode at landing when passing :", options: ["50 ft", "100 ft", "75 ft"], answer: "50 ft" },
+            { q: "During landing, as the aircraft descends through 30 ft :", options: ["Pitch attitude is memorized", "Pitch attitude is progressively reduced to -2º nose down over a period of 8 seconds"], answer: "Pitch attitude is progressively reduced to -2º nose down over a period of 8 seconds" },
+            { q: "How can a deactivated sidestick be reactivated ?", options: ["By momentarily pressing the take over push button of the deactivated stick", "By momentarily pressing the take over push button of the active stick", "By simultaneous action on both take over push buttons", "A or B above."], answer: "A or B above." },
+            { q: "In roll normally law, the bank angle protection is active when bank angle is:", options: [">45 c", ">33 c", ">67 c"], answer: ">33 c" },
+            { q: "The roll normal law provides combined control of the : soru gereksiz zor", options: ["Ailerons + spoilers 2 to 5 + rudder.", "Ailerons + spoilers 2 to 5."], answer: "Ailerons + spoilers 2 to 5 + rudder." },
+            { q: "If ELAC 1 and ELAC 2 have failed :", options: ["Roll control is provided by ailerons only.", "Roll contol is provided by ailerons and spoilers.", "Roll control is provided by spoilers only."], answer: "Roll control is provided by spoilers only." },
+            { q: "In flight , if a WTB (wing tip brake ) is activated, can you release it ?", options: ["YES", "NO"], answer: "NO" },
+            { q: "Which signals cause rudder pedal movement ?", options: ["Turn coordination signals", "Yaw damping signals.", "Rudder trim signals."], answer: "Rudder trim signals." },
+            { q: "What happens when SFCC 1 fails :", options: ["Nothing.", "Flaps and slats operate at half speed.", "Flaps system lost."], answer: "Flaps and slats operate at half speed." },
+            { q: "If only one hydraulic system is inoperative, the corresponding surfaces (slats or flaps) operate:", options: ["Slats are lost", "At half speed", "Flaps are lost"], answer: "At half speed" },
+            { q: "When in Configuration 1+F, at which speed the flaps retract to 0 automatically ?", options: ["180 kts", "210 kts", "V2"], answer: "210 kts" },
+            { q: "Following an automatic retraction of the flaps, will they automatically re-extend when the airspeed decreases below 210 kts?", options: ["YES", "NO"], answer: "NO" },
+            { q: "Is it possible to select an intermediate lever position with the flaps lever other than 0,1,2,3 and Full?", options: ["YES", "NO"], answer: "NO" },
+            { q: "If you are flying at an angle of attack of more than ALPHA PROT with the sidestick all the way back, what happens when you release the stick?", options: ["Angle of attack returns to VLS and stays there", "Angle of attack returns to ALPHA PROT and stays there"], answer: "Angle of attack returns to ALPHA PROT and stays there" },
+            { q: "When alternate law is active, the pitch attitude and bank angle protections are :", options: ["Degraded.", "Lost ."], answer: "Lost ." },
+            { q: "When alternate law is active, the yaw damping function is :", options: ["Available ( damper authority is limited to +/- 5º rudder ).", "Lost."], answer: "Available ( damper authority is limited to +/- 5º rudder )." },
+            { q: "When bank angle protection is active, auto trim is inoperative.", options: ["True", "False"], answer: "True" },
+            { q: "How many hydraulic systems activate the rudder :", options: ["1", "2", "3"], answer: "3" },
+            { q: "Which surfaces are used as ground spoilers ?", options: ["Spoilers 1 to 4", "All spoilers", "Spoilers 1 to 3"], answer: "All spoilers" },
+            { q: "Alpha/speed lock function inhibits slat retraction at high angles-of-attack and low speeds. If alpha exceeds a certain limit or the airspeed goes below a limit value, slat retraction from position 1 to position 0 is inhibited.", options: ["True", "False"], answer: "True" },
+            { q: "In alternate law, the change to direct law occurs when:", options: ["Landing gear down or at the selection of flaps 2 (LGCIU 1+ 2 fault )", "Landing gear down", "Passing 50 ft"], answer: "Landing gear down or at the selection of flaps 2 (LGCIU 1+ 2 fault )" },
+            { q: "When both sidesticks are moved in the same or opposite direction", options: ["Both pilot inputs are algebraically added", "The left sidestick has the priority", "The surface movement is proportional to the last sidestick deflected", "The surface movement is proportional to the first sidestick deflected"], answer: "Both pilot inputs are algebraically added" },
+            { q: "Slats sys 1 fault on the ECAM warning display means :", options: ["SFCC 1 has failed", "The slat channel of one SFCC has failed."], answer: "The slat channel of one SFCC has failed." },
+            { q: "With hydraulic blue and yellow systems low pressure, the flight control law is :", options: ["Normal law", "Alternate law", "Direct law"], answer: "Normal law" },
+            { q: "In flight control normal law, the stall warning is activated :", options: ["If slats are not extended when reaching a speed of 148 knots.", "When ALPHA max is reached.", "When ALPHA prot is reached.", "Angle of attack corresponding to stall warning cannot be reached in normal law."], answer: "Angle of attack corresponding to stall warning cannot be reached in normal law." },
+            { q: "The pitch normal law protections are", options: ["Load factor limitation , pitch attitude protection , high-angle-of-attack protection , high-speed protection", "Load factor limitation , pitch attitude protection , low speed stability", "Load factor limitation , pitch attitude protection , high-speed protection", "Load factor limitation , high-angle-of-attack protection , high-speed protection"], answer: "Load factor limitation , pitch attitude protection , high-angle-of-attack protection , high-speed protection" },
+
+            // --- ANNEX SORULARI ---
+            { q: "Please answer based on the given image:", img: "annexes/flightcontrols/flightcontrols_annex1.png", options: ["A", "B", "C", "D"], answer: "A" },
+            { q: "Please answer based on the given image:", img: "annexes/flightcontrols/flightcontrols_annex2.png", options: ["A", "B", "C", "D"], answer: "A" },
+            { q: "Please answer based on the given image:", img: "annexes/flightcontrols/flightcontrols_annex3.png", options: ["A", "B", "C", "D"], answer: "C" },
+            { q: "Please answer based on the given image:", img: "annexes/flightcontrols/flightcontrols_annex4.png", options: ["A", "B", "C", "D"], answer: "B" },
+            { q: "Please answer based on the given image:", img: "annexes/flightcontrols/flightcontrols_annex5.png", options: ["A", "B", "C", "D"], answer: "C" },
+            { q: "Please answer based on the given image:", img: "annexes/flightcontrols/flightcontrols_annex6.png", options: ["A", "B", "C"], answer: "A" },
+            { q: "Please answer based on the given image:", img: "annexes/flightcontrols/flightcontrols_annex7.png", options: ["A", "B", "C"], answer: "A" },
+            { q: "Please answer based on the given image:", img: "annexes/flightcontrols/flightcontrols_annex8.png", options: ["A", "B", "C", "D"], answer: "A" },
+            { q: "Please answer based on the given image:", img: "annexes/flightcontrols/flightcontrols_annex9.png", options: ["A", "B", "C", "D"], answer: "D" },
+            { q: "Please answer based on the given image:", img: "annexes/flightcontrols/flightcontrols_annex10.png", options: ["A", "B", "C", "D"], answer: "B" },
+            { q: "Please answer based on the given image:", img: "annexes/flightcontrols/flightcontrols_annex11.png", options: ["A", "B", "C", "D"], answer: "A" },
+            { q: "Please answer based on the given image:", img: "annexes/flightcontrols/flightcontrols_annex12.png", options: ["A", "B", "C", "D"], answer: "D" },
+            { q: "Please answer based on the given image:", img: "annexes/flightcontrols/flightcontrols_annex13.png", options: ["A", "B", "C", "D"], answer: "A" },
+            { q: "Please answer based on the given image:", img: "annexes/flightcontrols/flightcontrols_annex14.png", options: ["A", "B", "C", "D"], answer: "B" },
+            { q: "Please answer based on the given image:", img: "annexes/flightcontrols/flightcontrols_annex15.png", options: ["A", "B", "C", "D"], answer: "C" },
+            { q: "Please answer based on the given image:", img: "annexes/flightcontrols/flightcontrols_annex16.png", options: ["A", "B", "C", "D"], answer: "D" },
+            { q: "Please answer based on the given image:", img: "annexes/flightcontrols/flightcontrols_annex17.png", options: ["A", "B", "C", "D"], answer: "A" },
+            { q: "Please answer based on the given image:", img: "annexes/flightcontrols/flightcontrols_annex18.png", options: ["A", "B", "C", "D"], answer: "D" },
+            { q: "Please answer based on the given image:", img: "annexes/flightcontrols/flightcontrols_annex19.png", options: ["A", "B", "C", "D"], answer: "A" },
+            { q: "Please answer based on the given image:", img: "annexes/flightcontrols/flightcontrols_annex20.png", options: ["A", "B", "C", "D"], answer: "A" },
+            { q: "Please answer based on the given image:", img: "annexes/flightcontrols/flightcontrols_annex21.png", options: ["A", "B", "C", "D"], answer: "C" },
+            { q: "Please answer based on the given image:", img: "annexes/flightcontrols/flightcontrols_annex22.png", options: ["A", "B", "C", "D"], answer: "B" },
+            { q: "Please answer based on the given image:", img: "annexes/flightcontrols/flightcontrols_annex23.png", options: ["A", "B", "C"], answer: "A" },
+            { q: "Please answer based on the given image:", img: "annexes/flightcontrols/flightcontrols_annex24.png", options: ["A", "B", "C", "D"], answer: "A" },
+            { q: "Please answer based on the given image:", img: "annexes/flightcontrols/flightcontrols_annex25.png", options: ["A", "B", "C", "D"], answer: "B" },
+            { q: "Please answer based on the given image:", img: "annexes/flightcontrols/flightcontrols_annex26.png", options: ["A", "B", "C", "D"], answer: "C" },
+            { q: "Please answer based on the given image:", img: "annexes/flightcontrols/flightcontrols_annex27.png", options: ["A", "B", "C", "D"], answer: "D" },
+            { q: "Please answer based on the given image:", img: "annexes/flightcontrols/flightcontrols_annex28.png", options: ["A", "B", "C", "D"], answer: "B" },
+            { q: "Please answer based on the given image:", img: "annexes/flightcontrols/flightcontrols_annex29.png", options: ["A", "B", "C", "D"], answer: "D" },
+            { q: "Please answer based on the given image:", img: "annexes/flightcontrols/flightcontrols_annex30.png", options: ["A", "B", "C", "D"], answer: "D" },
+            { q: "Please answer based on the given image:", img: "annexes/flightcontrols/flightcontrols_annex31.png", options: ["A", "B", "C", "D"], answer: "A" },
+            { q: "Please answer based on the given image:", img: "annexes/flightcontrols/flightcontrols_annex32.png", options: ["A", "B", "C", "D"], answer: "D" },
+
+            // --- KALAN METİN SORULARI (74-125) ---
+            { q: "The flight control surfaces are ............ controlled and ............... actuated.", options: ["Electrically / Electrically", "Electrically / Hydraulically", "Mechanically / Hydraulicaly"], answer: "Electrically / Hydraulically" },
+            { q: "Which of the following statements is correct concerning the spoiler elevator computers (SEC's)?", options: ["2 computers which achieve spoiler control, standby elevator and THS control.", "3 computers which achieve spoiler control, normal elevator and THS control.", "3 computers which achieve spoiler control, standby elevator and THS control."], answer: "3 computers which achieve spoiler control, standby elevator and THS control." },
+            { q: "Which controls are used for the mechanical backup?", options: ["THS and elevator.", "Ailerons and rudder.", "THS and rudder.", "Elevators and ailerons."], answer: "THS and rudder." },
+            { q: "The FAC's primarily control which control surface?", options: ["Elevator and Ailerons.", "Rudder.", "Ailerons.", "Elevator."], answer: "Rudder." },
+            { q: "What computer normally commands the operation of the elevators and horizontal stabilizer?", options: ["ELAC's", "SEC's", "FAC's"], answer: "ELAC's" },
+            { q: "Which of the following statements is correct concerning the elevator aileron computers (ELAC's)?", options: ["2 computers which achieve normal and standby control of the elevators, ailerons and THS.", "3 computers which achieve normal elevator, stabilizer and aileron control.", "3 computers which achieve normal and standby control of the elevators, ailerons and THS", "2 computers which achieve normal elevator, stabilizer and aileron control."], answer: "2 computers which achieve normal and standby control of the elevators, ailerons and THS." },
+            { q: "Roll control is achieved by:", options: ["1 aileron and 4 spoilers on each wing", "Ailerons", "Ailerons, rudder and spoilers", "Ailerons and rudder."], answer: "1 aileron and 4 spoilers on each wing" },
+            { q: "When the flaps are extended, the ailerons:", options: ["Pitch up 5 degrees.", "Go to the centering mode.", "Droop 5 degrees."], answer: "Droop 5 degrees." },
+            { q: "If electrical power to a SEC fails:", options: ["The affected spoilers remains in the last commanded position.", "All spoilers automatically retract.", "The affected spoilers automatically retract."], answer: "The affected spoilers automatically retract." },
+            { q: "If angle of attack protection is active or flaps are in the conf full (or some MSN conf 3):", options: ["Speed brake extension travel is reduced.", "Speed brake extension is inhibited.", "Aileron travel is reduced."], answer: "Speed brake extension is inhibited." },
+            { q: "In manual flight manual rudder trim rate is ............ up to a maximum of ............ .", options: ["5deg/sec – 10 (for some MSN 15) degrees.", "1deg/sec – 20 (for some MSN 25) degrees.", "2deg/sec – 20 (for some MSN 25) degrees.", "2deg/sec – 10 (for some MSN 15) degrees."], answer: "1deg/sec – 20 (for some MSN 25) degrees." },
+            { q: "Roll control in Normal Law is achieved with:", options: ["Ailerons, all spoilers and rudder.", "Ailerons, 4 spoilers and rudder.", "Ailerons and rudder."], answer: "Ailerons, 4 spoilers and rudder." },
+            { q: "When ground spoilers deploy automatically:", options: ["6 spoiler panels on each wing deploy.", "All 10 spoiler panels deploy half way.", "4 spoiler panels on each wing deploy.", "All 10 spoiler panels fully deploy."], answer: "All 10 spoiler panels fully deploy." },
+            { q: "The aircraft rudder can be manually trimmed with the autopilot engaged.", options: ["True.", "False."], answer: "False." },
+            { q: "Can the rudders be moved with both FAC's inoperative?", options: ["Yes, if both FAC's fail, maximum rudder deflection can be obtained when the slats are extended.", "Yes, if both FAC's fail, maximum rudder deflection can be obtained when the gear is extended or at least flaps extended to 1.", "Yes, if both FAC's fail maximum rudder deflection can be obtained.", "No."], answer: "Yes, if both FAC's fail, maximum rudder deflection can be obtained when the slats are extended." },
+            { q: "What happens in the event of an single ELAC failure?", options: ["The function of the failed ELAC will be assumed by the remaining ELAC.", "ELAC functions are transferred to the SEC's.", "ELAC functions are transferred to the FAC's.", "SEC functions are transferred to the ELAC's."], answer: "The function of the failed ELAC will be assumed by the remaining ELAC." },
+            { q: "Which of the foolowing statements are true about spoilers?", options: ["The system automatically retracts the spoilers to their zero position, if it detects a fault or losses electrical control.", "If the system losses hydraulic pressure, the spoiler retains the deflection it had at the time of the loss or a lesser deflection if aerodynamic forces push it down.", "When a spoiler surface on one wing fails, the symmetric one on the other wing is inhibited.", "All of the above."], answer: "All of the above." },
+            { q: "Which spoilers are used as speedbrakes?", options: ["All", "2-3-4", "1-2-3", "1-3-5"], answer: "2-3-4" },
+            { q: "On which aircraft type you can reach full speedbrake deflection only in manual flight?", options: ["A319", "A320", "A321", "All of the above"], answer: "A320" },
+            { q: "In Pitch Normal Law Flight Mode; pitch trim is:", options: ["Automatic as long as the autopilot is engaged.", "Automatic with or without the autopilot engaged.", "Manual without the autopilot engaged."], answer: "Automatic with or without the autopilot engaged." },
+            { q: "The purpose of the Load Alleviation Function is to:", options: ["Relieve wing structure loads by moving the ailerons.", "Relieve wing structure loads by extending spoilers 4 and 5.", "Help slow the airplane down.", "A and B are correct."], answer: "A and B are correct." },
+            { q: "In Normal Law, if one stick is rapidly pulled fully back, can the aircraft's maximum allowable “G” load be exceeded?", options: ["Yes. Rapid side stick deflection must never be made.", "No. At maximum “G” load, the side sticks are de-activated for 5 seconds.", "No. The load factor limitation overrides side stick commands to avoid excessive “G” loads.", "Yes, until maximum pitch attitude is reached."], answer: "No. The load factor limitation overrides side stick commands to avoid excessive “G” loads." },
+            { q: "Which of the following statements best describes the Load Alleviation Function (LAF)?", options: ["Relieve wing structure loads by deflecting only the spoilers.", "Relieve wing structure loads by deflecting the ailerons and spoilers.", "Relieve wing structure loads by deflecting the ailerons.", "Helps the pilot control the airplane."], answer: "Relieve wing structure loads by deflecting the ailerons and spoilers." },
+            { q: "In Normal Law, what is the maximum bank angle you can reach with the side stick fully deflected?", options: ["70 degree.", "67 degree.", "33 degree.", "49 degree."], answer: "67 degree." },
+            { q: "What happens in the side stick-neutral high speed protection mode?", options: ["The autopilot disengages, bank angle limit is 45 degree and the aircraft is 25 degree roll limited.", "The autopilot disengages, bank angle limit is 30 degree and the aircraft is 25 degree roll limited.", "The autopilot disengages, bank angle limit is 35 degree and the aircraft rolls wings level and pitches to 10 degree to slow down to VMO/MMO-20kt.", "The autopilot disengages, bank angle limit is 45 degree and the aircraft rolls wings level and pitches up to slow down to VMO/MMO."], answer: "The autopilot disengages, bank angle limit is 45 degree and the aircraft rolls wings level and pitches up to slow down to VMO/MMO." },
+            { q: "What happens if you release the stick at 40 degrees of bank?", options: ["The aircraft rolls back to 33 degree and resume flight path stability.", "The bank stays at 40 degree.", "The aircraft rolls back to a bank angle less than 29 degree.", "The aircraft rolls back to 25 degree."], answer: "The aircraft rolls back to 33 degree and resume flight path stability." },
+            { q: "In Normal Law, what are the limits of Pitch Attitude protections with flaps Full?", options: ["30 degree nose up.", "35 degree nose up progressively reduced to 20 degree.", "25 degree nose up progressively reduced to 20 degree at low speed.", "There is no limit."], answer: "25 degree nose up progressively reduced to 20 degree at low speed." },
+            { q: "In Pitch Normal Law, the elevator control changes from the normal mode to a protection mode when the angle of attack is greater than:", options: ["Alpha Prot", "Alpha Max", "Alpha Floor"], answer: "Alpha Prot" },
+            { q: "The normal law protects the aircraft throughout the flight envelope as follows: 1-Load Factor Limitation 2-Pitch Attitude Protection 3-High Angle of Attack (AOA) Protection 4-High Speed Protection", options: ["True.", "False."], answer: "True." },
+            { q: "Can the crew make a flight control input that will over-stress the airplane in Direct Law?", options: ["No. The system is designed to avoid such an attempt.", "Yes. There are no protection provided in Direct Law."], answer: "Yes. There are no protection provided in Direct Law." },
+            { q: "You can degrade directly from Normal Law to Direct Law with gear down and a dual radio altimeter fault.", options: ["True.", "False."], answer: "True." },
+            { q: "When the landing gear is extended, pitch alternate law:", options: ["Degrades to pitch direct law.", "Remains the same.", "Degrades to pitch backup law."], answer: "Degrades to pitch direct law." },
+            { q: "What kind of protections are provided if the aircraft is in Alternate Law?", options: ["G-load protection and speed stability if the ADIRS and elevators are working.", "G-load protection with a reduced factor.", "Speed Stability.", "None of the above."], answer: "G-load protection and speed stability if the ADIRS and elevators are working." },
+            { q: "Sidesticks provide electrical signals to the flight control computers; if both sidesticks are operated:", options: ["Both inputs are algebraically added", "The F/O input is overridden by the CPT input.", "The inputs cancel each other."], answer: "Both inputs are algebraically added" },
+            { q: "Horizontal stabilizer trim automatically resets to zero degrees after landing.", options: ["True", "False"], answer: "True" },
+            { q: "To select speed brakes in flight:", options: ["Push down on the speed brake handle and move it aft.", "Pull up on the speed brake handle and move it aft.", "Push down on the speed brake handle and move it forward."], answer: "Push down on the speed brake handle and move it aft." },
+            { q: "Which of the following statements are correct concerning the side stick takeover push button?", options: ["If the takeover push button is pressed for more than 40 seconds, the onside system will retain priority after the push button is released.", "The last pilot who press the push button has priority.", "A and B are correct."], answer: "A and B are correct." },
+            { q: "Selection of flap 1 prior to takeoff will select which of the following?", options: ["Slats 0 and Flaps 1 (0+F).", "Slats 1 and Flaps 1 (1+F).", "Slats 1 and Flaps 2 (1).", "Slats 1 and Flaps 0 (1)."], answer: "Slats 1 and Flaps 1 (1+F)." },
+            { q: "Automatic pitch trim is provided both on ground and in flight.", options: ["True.", "False."], answer: "False." },
+            { q: "Aileron droop may best be confirmed by checking which of the following?", options: ["The lower ECAM F/CTL Page.", "The position of the ailerons on the exterior preflight inspection.", "The position of the flap handle."], answer: "The lower ECAM F/CTL Page." },
+            { q: "Selection of flaps 1 in flight will select which of the following configurations?", options: ["Slats 1 and Flaps 2 (1+F).", "Slats 0 and Flaps 1 (0+F).", "Slats 1 and Flaps 1 (1+F).", "Slats 1 and Flaps 0 (1)."], answer: "Slats 1 and Flaps 0 (1)." },
+            { q: "To disable a side-stick, you have to press the red take-over button for 40 seconds. It will electrically lock other stick out until its own red take-over button is pushed again.", options: ["True.", "False."], answer: "True." },
+            { q: "Let's assume F/O presses his take-over push button and release it after more than 40 seconds.", options: ["The Captain's side stick is deactivated unless he presses his takeover pushbutton.", "Both side stick are active.", "The Captain is unable to reactivate his side stick for the rest of the flight.", "The Captain's side stick is active as long as the F/O's side stick is in neutral position."], answer: "The Captain's side stick is deactivated unless he presses his takeover pushbutton." },
+            { q: "Which of the following will automatically reset after landing?", options: ["THS.", "Rudder trim.", "Both are correct."], answer: "THS." },
+            { q: "If both pilots deflect their side sticks fully back:", options: ["The “pitch up” order is equal to a single stick deflection.", "The “pitch up” order is twice as high as with only one stick deflected.", "The “pitch up” order is 1.5 times higher than only one stick deflected.", "No inputs are sent to the flight control computers unless one pilot presses the takeover pushbutton on his stick."], answer: "The “pitch up” order is equal to a single stick deflection." },
+            { q: "Where does the SFCC's obtain AOA and air data information from?", options: ["SEC", "ELAC", "ADC", "ADIRU"], answer: "ADIRU" },
+            { q: "Which of the following controls and monitors flaps and slats?", options: ["Wing tip brakes.", "2 Slat Flap Control Computers (SFCC's).", "2 ELAC's.", "1 Slat Flap Control Computer (SFCC)."], answer: "2 Slat Flap Control Computers (SFCC's)." },
+            { q: "The wing tip brakes are:", options: ["Hydraulically actuated.", "Pneumatically actuated.", "Electric brakes.", "Mechanically controlled."], answer: "Hydraulically actuated." },
+            { q: "What condition will cause auto flap retraction?", options: ["Exceed 190 kt with Flaps 1 while extending the speedbrake lever.", "Exceed 195 kt at Flaps 1.", "Exceed 190 kt at Flaps 1.", "Exceed 210 kt at Flaps 1."], answer: "Exceed 210 kt at Flaps 1." },
+            { q: "The Flap lever sends signal to Slat Flap Control Computer (SFCC) to command movement.", options: ["True.", "False."], answer: "True." },
+            { q: "Hydraulically operated wing tip brakes are installed to lock the flaps or slats in case of:", options: ["Asymmetry, overspeed, symmetrical runaway and uncommanded movement.", "Asymmetry and overspeed only.", "Asymmetry, overspeed and slow movement.", "All of the above."], answer: "Asymmetry, overspeed, symmetrical runaway and uncommanded movement." },
+            { q: "The wing tip brakes, once activated:", options: ["Lock only the affected high lift system surfaces in their current position.", "Lock both the slats and flaps in their current position.", "Lock only the flaps in their current position.", "Lock only the slats in their current position."], answer: "Lock only the affected high lift system surfaces in their current position." }
+        ],
+        fire_protection: [
+            // --- İLK METİN SORULARI (1-22) ---
+            { q: "What additional external warnings are activated in case of an APU fire on ground only ?", options: ["An external horn warning.", "A fire bell warning.", "APU fire light and an external warning horn."], answer: "APU fire light and an external warning horn." },
+            { q: "Which systems are tested through the ENG or APU FIRE test push button ?", options: ["The fire detection system", "The extinguishing system", "both"], answer: "both" },
+            { q: "The engines and the APU each have a fire and overheat detection system consisting of two identical gas detection loops mounted in parallel and a Fire Detection Unit (FDU).", options: ["True", "False"], answer: "True" },
+            { q: "The agent push button is active when :", options: ["The engine fire push button switch is pushed in and released out.", "The corresponding \"DISCH\" light is on .", "The engine fire push button switch lights up red."], answer: "The engine fire push button switch is pushed in and released out." },
+            { q: "How is an APU fire on ground normally extinguished:", options: ["From the APU fire panel", "Automatically", "From the EXTERNAL POWER PANEL"], answer: "Automatically" },
+            { q: "How can a thermal discharge of the APU fire bottle be detected when no electrical power is connected:", options: ["By the FDU.", "By the ECAM.", "By the red disc indicator."], answer: "By the red disc indicator." },
+            { q: "How many fire sensing elements does each APU fire detection loop have?", options: ["Three", "Two", "One"], answer: "One" },
+            { q: "What systems are isolated when the APU fire push button is released out.", options: ["Fuel, electricity.", "Air, electricity.", "Fuel, air, electricity."], answer: "Fuel, air, electricity." },
+            { q: "When the engine fire push button is released out, which valves are affected?", options: ["Low-pressure fuel valve, hydraulic fire shut off valve, eng bleed valve, pack flow control valve", "Hydraulic fire shut off valve, pack flow control valve", "Fuel crosfeed valve, eng bleed valve"], answer: "Low-pressure fuel valve, hydraulic fire shut off valve, eng bleed valve, pack flow control valve" },
+            { q: "When the APU fire pushbutton is released out, the :", options: ["APU generator is deactivated", "APU generator is not affected", "APU generator is energized"], answer: "APU generator is deactivated" },
+            { q: "Is it necessary to use the APU shut off switch on the external power panel in case of APU fire on ground ?", options: ["YES, THIS IS THE ONLY WAY TO ACTIVATE FIRE-EXTINGUISHER ON GROUND.", "NO, APU SHUTS DOWN AND AGENT IS DISCHARGED AUTOMATICALLY."], answer: "NO, APU SHUTS DOWN AND AGENT IS DISCHARGED AUTOMATICALLY." },
+            { q: "Where are the engine fire detectors located?", options: ["On the pylon nacelle, in the engine fan section and in the engine core", "In the engine core and the accessory gearbox", "On the fan section and the engine turbine"], answer: "On the pylon nacelle, in the engine fan section and in the engine core" },
+            { q: "When the ENG fire pushbutton is released out, which aircraft systems are isolated?", options: ["Fuel, electricity, air.", "Fuel, hydraulic, air.", "Fuel, air, electricity, hydraulic."], answer: "Fuel, air, electricity, hydraulic." },
+            { q: "When an ENG fire pushbutton is released out, the fire extinguisher squibs are armed.", options: ["TRUE", "FALSE"], answer: "TRUE" },
+            { q: "The engine and APU fire protection systems include :", options: ["2 fire extingusihing bottles for each engine-1fire extinguishing bottle for the APU .", "1 fire extinguishing bottle for each engine-1 fire extinguishing bottle for the APU.", "2 fire extinguishing bottles for the engines-2 fire extinguishing bottles for the APU"], answer: "2 fire extingusihing bottles for each engine-1fire extinguishing bottle for the APU ." },
+            { q: "Smoke detection systems are installed in:", options: ["The avionics bay and the cargo compartments", "The avionics bay, the cargo compartments and the lavatories", "The avionics bay, the cargo compartments and the galleys"], answer: "The avionics bay, the cargo compartments and the lavatories" },
+            { q: "When the smoke detector in the air extraction duct of the avionics ventilation system detects smoke in the avionics compartment, SMOKE light comes on associated with:", options: ["The bus tie push button.", "The GEN 1 push button on ELEC panel.", "The GEN 1 LINE push button on EMER ELEC PWR panel."], answer: "The GEN 1 LINE push button on EMER ELEC PWR panel." },
+            { q: "The avionics bay smoke detector is located:", options: ["In the cockpit behind the DU's", "In the air extraction duct of the avionics ventilation system", "In the skin heat exchanger"], answer: "In the air extraction duct of the avionics ventilation system" },
+            { q: "The avionics smoke warning is inhibited during take off:", options: ["From 80kts to liftoff", "From 80kts to1500ft", "Never inhibited"], answer: "From 80kts to1500ft" },
+            { q: "The lavatory smoke detection system consists of one smoke detector in each lavatory and a CIDS Decoder Encoder Unit that links the detector to the entire CIDS system or a double channel Smoke Detection Control Unit (SDCU).", options: ["True", "False"], answer: "True" },
+            { q: "Lavatory smoke detectors send smoke signal directly to:", options: ["LGCIU", "CIDS/SDCU", "FDU"], answer: "CIDS/SDCU" },
+            { q: "Pressing Cargo Smoke Test pushbutton for at least 3 seconds;", options: ["Tests the smoke detectors in sequence", "Turns on the red smoke lights twice and displays the ECAM warning", "Turns on the amber DISCH light", "All of the above"], answer: "All of the above" },
+
+            // --- ANNEX SORULARI ---
+            { q: "Please answer based on the given image:", img: "annexes/fireprotection/fireprotection_annex1.png", options: ["A", "B", "C", "D"], answer: "A" },
+            { q: "Please answer based on the given image:", img: "annexes/fireprotection/fireprotection_annex2.png", options: ["A", "B", "C"], answer: "C" },
+            { q: "Please answer based on the given image:", img: "annexes/fireprotection/fireprotection_annex3.png", options: ["A", "B"], answer: "A" },
+            { q: "Please answer based on the given image:", img: "annexes/fireprotection/fireprotection_annex4.png", options: ["A", "B"], answer: "A" },
+            { q: "Please answer based on the given image:", img: "annexes/fireprotection/fireprotection_annex5.png", options: ["A", "B", "C"], answer: "C" },
+            { q: "Please answer based on the given image:", img: "annexes/fireprotection/fireprotection_annex6.png", options: ["A", "B", "C", "D"], answer: "B" },
+            { q: "Please answer based on the given image:", img: "annexes/fireprotection/fireprotection_annex7.png", options: ["A", "B", "C", "D"], answer: "C" },
+
+            // --- KALAN METİN SORULARI (30-39) ---
+            { q: "How many gas detection loops does the APU fire and overheat detection system consists of?", options: ["3", "2", "1"], answer: "2" },
+            { q: "Engine fire loops are installed in the;", options: ["Pylon nacelle", "Core", "Fan", "All of the above"], answer: "All of the above" },
+            { q: "If a break in both engine fire loops occurs within _____ seconds of each other a _____ will occur.", options: ["8 sec./ a FIRE warning", "7 sec./ a FIRE DET FAULT message on ECAM", "10 sec./ a FIRE DET FAULT message on ECAM", "5 sec./ a FIRE warning"], answer: "5 sec./ a FIRE warning" },
+            { q: "The engines has dual fire detector loops to ensure that a fault in one fire loop will not affect fire detection capabilities;", options: ["TRUE", "FALSE"], answer: "TRUE" },
+            { q: "If there is an APU fire in flight the APU;", options: ["Will automatically shut down and the fire bottle will discharge.", "Must be shut down manually and the agent is manually discharged.", "Must be shut down manually but the fire bottle will discharge automatically"], answer: "Must be shut down manually and the agent is manually discharged." },
+            { q: "When the APU FIRE PB SW is released out;", options: ["The Fire extinguisher bottle is discharged", "The Fuel HP valve is closed", "The APU bleed and crossbleed valves are closed"], answer: "The APU bleed and crossbleed valves are closed" },
+            { q: "DISCH light on either the engine or APU fire agent switches indicates;", options: ["The APU or engine FIRE switch has been pushed", "The extinguisher bottle has lost pressure", "A fault has occurred in the respective fire detecting loop"], answer: "The extinguisher bottle has lost pressure" },
+            { q: "The GEN 1 LINE amber SMOKE light indicates;", options: ["A fire caused by number 1 generator", "Smoke is detected in the avionics ventilation duct", "Smoke in the cargo ventilation system"], answer: "Smoke is detected in the avionics ventilation duct" },
+            { q: "Can the APU FIRE test be performed using battery power only?", options: ["YES", "NO"], answer: "YES" },
+            { q: "When the aircraft is on the ground and the APU is started on battery power only, is fire protection available?", options: ["Yes, the APU will initiate an auto shutdown and discharge the extinguishing agent", "No, but the APU will initiate an auto shutdown", "No, automatic fire protection is only available if AC power is available"], answer: "Yes, the APU will initiate an auto shutdown and discharge the extinguishing agent" }
+        ],
+        fuel: [
+            // --- İLK METİN SORULARI (1-27) ---
+            { q: "How many pumps are there in each wing fuel tank ?", options: ["Two fuel pumps in each wing tank.", "There is no fuel pump because tanks are air pressurized.", "One fuel pump in each tank.", "Two fuel pumps only for all tanks."], answer: "Two fuel pumps in each wing tank." },
+            { q: "Normally, where can you check the fuel quantity of each tank ?", options: ["On ECAM upper display, on fuel page.", "On fuel page only, on ECAM lower display.", "ON ECAM upper display.", "ON ECAM upper display, or on refueling control panel."], answer: "On fuel page only, on ECAM lower display." },
+            { q: "At which fuel quantity is the low level L(R) WING TK LO LVL warning triggered on the ECAM ?", options: ["Below 500 KG ( 1100 ib ).", "Above 900 KG ( 1980 ib ).", "Below 750 KG ( 1650 ib ).", "Below 250 KG ( 550 ib )"], answer: "Below 750 KG ( 1650 ib )." },
+            { q: "How many channels are used in the fuel computation system ?", options: ["3", "1", "2"], answer: "2" },
+            { q: "Where is the vent surge tank located ?", options: ["Outboard of each wing tank.", "In the wing tank."], answer: "Outboard of each wing tank." },
+            { q: "What is the minimum fuel quantity for take off and the maximum outer tank fuel quantity unbalance for take off or landing for A 320 aircraft ?", options: ["750 KG. 1200 KG.", "1500 KG - 690 KG.", "2000 KG - 1500 KG.", "5000 KG - 1100 KG."], answer: "1500 KG - 690 KG." },
+            { q: "Which type of motor controls the fuel cross - feed :", options: ["Single.", "Double."], answer: "Double." },
+            { q: "How can you understand that fuel quantity indication ( FQI ) is in degraded mode ?", options: ["FQI is in amber box.", "FQI is dashed across the last two digits but it is impossible to determine which side is affected.", "FQI is dashed across the last two digits and ECAM fuel page must be called to check which tank is affected.", "FQI flashes on ECAM fuel page of affected tank"], answer: "FQI is dashed across the last two digits and ECAM fuel page must be called to check which tank is affected." },
+            { q: "During initial climb when passing FL 200, gravity fuel feeding occurs, what will be the maximum flight level ?", options: ["300 (FL 200 if JET B ).", "200 ( FL100 if JET B )", "100", "150 ( FL 100 if JET B )"], answer: "150 ( FL 100 if JET B )" },
+            { q: "What is the refuelling time at nominal pressure ( approx ) :", options: ["20 minutes for all tanks.", "17 minutes for wing tanks.", "30 minutes for all tanks.", "A or B above."], answer: "A or B above." },
+            { q: "The fuel return valve is controlled by :", options: ["FMGC.", "FADEC", "FLSCU", "FQI"], answer: "FADEC" },
+            { q: "Amber fault light illuminates on wing tank pump push button when :", options: ["The delivery fuel pressure drops.", "Pump is not energized.", "Push button set to off without failure.", "Wing tank below 750 KG ( 1650 ib )."], answer: "The delivery fuel pressure drops." },
+            { q: "Amber fault light illuminates on the center tank MODE SEL push button when :", options: ["The delivery fuel pressure drops.", "Center tank has more than 250 KG and any wing tank has less than 5000 KG.", "The two center tank pumps are selected off."], answer: "Center tank has more than 250 KG and any wing tank has less than 5000 KG." },
+            { q: "What is the maximum wing fuel imbalance quantity for take/off and landing for A320 :", options: ["750 KG ( 1650 ib ).", "1320 KG ( 2910 ib ).", "2000 KG (4400 ib ).", "5000 KG ( 11000 ib )"], answer: "1320 KG ( 2910 ib )." },
+            { q: "The maximum refuelling pressure is :", options: ["50 PSI ( 3.5 bars )", "36 PSI ( 2.5 bars )", "11 PSI ( 0.75 bars )"], answer: "50 PSI ( 3.5 bars )" },
+            { q: "In case of single engine operation, if low level (LO. LVL ) is reached :", options: ["Cross feed valve must be kept open", "Cross feed valve must be closed.", "The fuel of the opposite side of engine running is lost.", "Cross feed valve is automatically kept open."], answer: "Cross feed valve must be kept open" },
+            { q: "FOB ( fuel on board ) indication which is half-boxed in amber on upper ECAM means :", options: ["The quantity shown is not fully usable.", "Fuel quantity indicator is degraded.", "Both center tank transfer valves fail in the closed position"], answer: "The quantity shown is not fully usable." },
+            { q: "What is the purpose of the capacitance probes ?", options: ["To mesure the fuel level.", "To mesure the fuel temperature.", "A and B above."], answer: "To mesure the fuel level." },
+            { q: "Fuel recirculation system is used for:", options: ["Cooling the hydraulic pumps.", "Cooling the air conditioning packs.", "Cooling the IDG oil."], answer: "Cooling the IDG oil." },
+            { q: "APU fuel is supplied by :", options: ["Engine fuel pump(s).", "APU fuel pump.", "Either one."], answer: "Either one." },
+            { q: "What does the fault light illuminated in amber within the wing tank push button indicate ?", options: ["Delivery pressure too high.", "Delivery pressure dropped.", "The push button is in off position."], answer: "Delivery pressure dropped." },
+            { q: "The 2% additional space is provided in each fuel tank:", options: ["For cooling purposes.", "For fuel expansion without spillage."], answer: "For fuel expansion without spillage." },
+            { q: "The engine low pressure ( LP ) valves are closed by :", options: ["Engine fire push button or center tank transfer valve control logic.", "Engine fire push button or mode selector push button in manual.", "Engine fire push button or the engine master switch."], answer: "Engine fire push button or the engine master switch." },
+            { q: "When the wing tank push button is set to off, the amber fault light:", options: ["Comes on", "Is illuminated when delivery pressure drops even though the pushbutton is set to off", "Does not come on"], answer: "Does not come on" },
+            { q: "In normal operation the cross feed valve is :", options: ["Automatically opened when the center tank has more than 100 KG of fuel and either wing tank has less than 5000 KG.", "Closed for take - off.", "Open for take - off.", "Automatically opened by the center tank MODE SEL push button switch."], answer: "Closed for take - off." },
+            { q: "Are the engine still supplied in case of fuel filter clog :", options: ["Yes by using the fuel coming from the IDG cooling and outer tank line", "No", "Yes bypassing the fuel filter ( bypass valve)"], answer: "Yes bypassing the fuel filter ( bypass valve)" },
+            { q: "On the crossfeed push button, what is the meaning of the \" ON \" white light ?", options: ["The valve is fully open", "The valve is closed", "The valve is in transit"], answer: "The valve is in transit" },
+
+            // --- ANNEX SORULARI ---
+            { q: "Please answer based on the given image:", img: "annexes/fuel/fuel_annex1.png", options: ["A", "B"], answer: "A" },
+            { q: "Please answer based on the given image:", img: "annexes/fuel/fuel_annex2.png", options: ["A", "B", "C"], answer: "C" },
+            { q: "Please answer based on the given image:", img: "annexes/fuel/fuel_annex3.png", options: ["A", "B", "C", "D"], answer: "C" },
+            { q: "Please answer based on the given image:", img: "annexes/fuel/fuel_annex4.png", options: ["A", "B", "C"], answer: "B" },
+            { q: "Please answer based on the given image:", img: "annexes/fuel/fuel_annex5.png", options: ["A", "B", "C", "D"], answer: "A" },
+            { q: "Please answer based on the given image:", img: "annexes/fuel/fuel_annex6.png", options: ["A", "B", "C"], answer: "C" },
+            { q: "Please answer based on the given image:", img: "annexes/fuel/fuel_annex7.png", options: ["A", "B", "C", "D"], answer: "A" },
+            { q: "Please answer based on the given image:", img: "annexes/fuel/fuel_annex8.png", options: ["A", "B", "C", "D"], answer: "D" },
+            { q: "Please answer based on the given image:", img: "annexes/fuel/fuel_annex9.png", options: ["A", "B", "C", "D"], answer: "C" },
+            { q: "Please answer based on the given image:", img: "annexes/fuel/fuel_annex10.png", options: ["A", "B", "C", "D"], answer: "B" },
+            { q: "Please answer based on the given image:", img: "annexes/fuel/fuel_annex11.png", options: ["A", "B", "C", "D"], answer: "A" },
+            { q: "Please answer based on the given image:", img: "annexes/fuel/fuel_annex12.png", options: ["A", "B"], answer: "A" },
+            { q: "Please answer based on the given image:", img: "annexes/fuel/fuel_annex13.png", options: ["A", "B"], answer: "B" },
+
+            // --- KALAN METİN SORULARI (41-42) ---
+            { q: "Fuel ADV message appear when Difference between wing fuel quantities greater than:", options: ["1 500 kg", "2500 kg", "5000 kg", "1000 kg"], answer: "1 500 kg" },
+            { q: "Reduce IDG load if possible (GALLEY or GEN OFF). action required, when IDG OIL TEMP temperature has increased above ≥", options: ["147 °C", "600", "300", "250"], answer: "147 °C" }
+        ],
+        ice_and_rain: [
+            // --- İLK METİN SORULARI (1-28) ---
+            { q: "In case of loss electrical power supply in flight, the engine anti - ice valve :", options: ["Opens when the engine is stopped.", "Opens when the engine is running.", "Closes when the engine is running."], answer: "Opens when the engine is running." },
+            { q: "In case of window heat computer failure, the other computer can replace the failed one :", options: ["Yes.", "No."], answer: "No." },
+            { q: "Window heating comes on automatically when one engine is stared :", options: ["Yes.", "No."], answer: "Yes." },
+            { q: "The window heat computer provides two heating levels for the wind shield :", options: ["Normal power when above 20 000 FT, low power below 20 000 FT.", "Normal power in flight, low power on ground.", "Normal power in icing conditions, low power in other conditions."], answer: "Normal power in flight, low power on ground." },
+            { q: "PITOT heating operates :", options: ["At low power on ground and normal power in flight.", "In flight only.", "On ground above 80 KTS."], answer: "At low power on ground and normal power in flight." },
+            { q: "The wing anti - ice push button switch on light comes on :", options: ["When the anti- ice valves open.", "When the push buton switch is set to on.", "When the fault light goes off."], answer: "When the push buton switch is set to on." },
+            { q: "Window heating can be selected on manually on ground before without engine running by the PROBE window heat push button.", options: ["Wrong.", "Right."], answer: "Right." },
+            { q: "Electrical heating is provided for the protection of :", options: ["PITOTS and AOA.", "PITOTS and TAT.", "PITOTS, STATIC PORTS, TAT, AOA."], answer: "PITOTS, STATIC PORTS, TAT, AOA." },
+            { q: "What happens when you set the wing anti - ice push button switch to on, on the ground ?", options: ["The wing anti - ice valves open for 30 seconds then close.", "The wing anti - ice valves do not open.", "The wing anti - ice valves remain open."], answer: "The wing anti - ice valves open for 30 seconds then close." },
+            { q: "The engine NACELLE is anti - iced by :", options: ["Air bleed from high presure compressor.", "Air bleed from low pressure compressor.", "Electrically."], answer: "Air bleed from high presure compressor." },
+            { q: "When engine anti - ice is selected on :", options: ["Continious ignition is selected on.", "The associated pack is closed"], answer: "Continious ignition is selected on." },
+            { q: "When an engine anti - ice valve is open :", options: ["The N2 of the associated engine decreases.", "N1 limit is automatically reduced.", "There is no change in N1 limit or N2."], answer: "N1 limit is automatically reduced." },
+            { q: "The engine anti - ice valve closes in case of low air pressure :", options: ["Right.", "Wrong."], answer: "Right." },
+            { q: "How can you check that engine anti - ice has been selected :", options: ["With the on light on the associated engine push button + ENG anti - ice on the ECAM MEMO display.", "With the on light on the associated engine push button + engine anti - ice on the ECAM engine page."], answer: "With the on light on the associated engine push button + ENG anti - ice on the ECAM MEMO display." },
+            { q: "The maximum speed to use the wind shield wipers is :", options: ["200 KTS.", "250 KTS.", "230 KTS."], answer: "230 KTS." },
+            { q: "The probe heating starts automatically when the push button switch is in auto position :", options: ["Not heated on the ground, but heated automatically at lift off.", "Operates in high heat after engine start.", "Operates in low heat until manually selected to high.", "In low heat after engine start and then norm heat after lift off."], answer: "In low heat after engine start and then norm heat after lift off." },
+            { q: "On a dry windshield, rain repellent system :", options: ["May be used as windshield washer.", "Must not be used."], answer: "Must not be used." },
+            { q: "The rain repellent system is inhibited :", options: ["When both engines are shut down.", "On ground below 80 KTS.", "Above FL 150"], answer: "When both engines are shut down." },
+            { q: "The rain repellent bottle should be replaced :", options: ["When the pressure indicator needle is in the yellow sector.", "After each flight.", "When the refill fload in view on the quantity indicator.", "A or C above."], answer: "A or C above." },
+            { q: "The electric wipers are controlled by 2 individual rotary selectors :", options: ["Yes.", "No."], answer: "Yes." },
+            { q: "The wipers can operate at different speeds :", options: ["Low speed and high speed.", "Only one speed.", "Low, medium, high speed."], answer: "Low speed and high speed." },
+            { q: "The rain repellent bottle is located :", options: ["In the rear of the cockpit on the left side.", "In the avionics bay.", "In the cockpit on the right side."], answer: "In the rear of the cockpit on the left side." },
+            { q: "The timer supplies a measured quantity of rain repellent to the wind shield : to repeat the cycle the push button must be pressed again :", options: ["No.", "Yes."], answer: "Yes." },
+            { q: "When not used, the wipers are out of view ?", options: ["Right.", "Wrong."], answer: "Right." },
+            { q: "The wing anti - ice shut off valves close automatically in case of :", options: ["Engine failure.", "Loss of electrical power supply or leak detection", "Cross bleed valve fault when wing anti - ice is used."], answer: "Loss of electrical power supply or leak detection" },
+            { q: "The slats protected by hot air supplied from the pneumatic system are :", options: ["Slats 1. 2. 4 .", "Slats 2. 3. 4 .", "The three outboard leading edge slats."], answer: "The three outboard leading edge slats." },
+            { q: "The wing anti - ice pressure control shut off valves are cotrolled by :", options: ["1 wing anti - ice push button.", "2 wing anti - ice push buttons.", "Automatically."], answer: "1 wing anti - ice push button." },
+            { q: "Where do the wing anti - ice indications appear on the ECAM ?", options: ["There is no indication on ECAM bleed page for the wing anti - ice system.", "\"Anti - ice\" appears in white on the ECAM bleed page when the wing anti - ice push button is depressed.", "A green arrow appears on the ECAM bleed page the wing anti - ice push button is pressed and the valve is open.", "B and C above."], answer: "B and C above." },
+
+            // --- ANNEX SORULARI ---
+            { q: "Please answer based on the given image:", img: "annexes/iceandrain/iceandrain_annex1.png", options: ["A", "B", "C"], answer: "C" },
+            { q: "Please answer based on the given image:", img: "annexes/iceandrain/iceandrain_annex2.png", options: ["A", "B", "C", "D"], answer: "D" },
+            { q: "Please answer based on the given image:", img: "annexes/iceandrain/iceandrain_annex3.png", options: ["A", "B", "C", "D"], answer: "B" },
+            { q: "Please answer based on the given image:", img: "annexes/iceandrain/iceandrain_annex4.png", options: ["A", "B", "C", "D"], answer: "D" },
+            { q: "Please answer based on the given image:", img: "annexes/iceandrain/iceandrain_annex5.png", options: ["A", "B", "C", "D"], answer: "A" },
+            { q: "Please answer based on the given image:", img: "annexes/iceandrain/iceandrain_annex6.png", options: ["A", "B"], answer: "B" },
+            { q: "Please answer based on the given image:", img: "annexes/iceandrain/iceandrain_annex7.png", options: ["A", "B", "C", "D"], answer: "B" },
+            { q: "Please answer based on the given image:", img: "annexes/iceandrain/iceandrain_annex8.png", options: ["A", "B", "C", "D"], answer: "B" },
+            { q: "Please answer based on the given image:", img: "annexes/iceandrain/iceandrain_annex9.png", options: ["A", "B", "C", "D"], answer: "A" },
+            { q: "Please answer based on the given image:", img: "annexes/iceandrain/iceandrain_annex10.png", options: ["A", "B", "C", "D"], answer: "D" },
+            { q: "Please answer based on the given image:", img: "annexes/iceandrain/iceandrain_annex11.png", options: ["A", "B", "C", "D"], answer: "C" },
+            { q: "Please answer based on the given image:", img: "annexes/iceandrain/iceandrain_annex12.png", options: ["A", "B", "C", "D"], answer: "D" },
+
+            // --- KALAN METİN SORULARI (41-42) ---
+            { q: "ENGINE ANTI ICE must be ON before and during a descent in icing conditions, even if the SAT is below :", options: ["-40 °C", "-15", "-25", "-60"], answer: "-40 °C" },
+            { q: "Icing conditions are severe when there is approximately …….. of ice accretion on the airframe.", options: ["5mm", "10 mm", "12mm", "3mm"], answer: "5mm" }
+        ],
+        indication: [
+            { q: "THE ELECTRONIC FLIGHT INSTRUMENT SYSTEM (EFIS) DISPLAYS MOSTLY FLIGHT PARAMETERS AND NAVIGATION DATA ON THE PRIMARY FLIGHT DISPLAYS (PFDS) AND NAVIGATION DISPLAYS (ND'S)", options: ["TRUE", "FALSE"], answer: "TRUE" },
+            { q: "IN NORMAL OPERATION, DMC 1 DRIVES THE FOLLOWING DISPLAY UNITS", options: ["DRIVES THE CAPT PFD, CAPT ND AND THE UPPER ECAM DUS", "DRIVES THE F/O PFD AND F/O ND, AND THE LOWER ECAM DUS", "IS ON STANDBY"], answer: "DRIVES THE CAPT PFD, CAPT ND AND THE UPPER ECAM DUS" },
+            { q: "IF A DU FAILS, THE FLIGHT CREW MAY FIND ONE OF THE FOLLOWING DISPLAYS:", options: ["A BLANK SCREEN WITH AN “F” LETTER IN AMBER", "A DISTORTED DISPLAY", "A BLANK SCREEN WITH THE “INVALID DISPLAY UNIT” MESSAGE IN AMBER", "ALL"], answer: "ALL" },
+            { q: "THE ECAM DISPLAY USES A AMBER COLOR CODE THAT INDICATES THE IMPORTANCE OF THE FAILURE OR THE INDICATION.", options: ["THE CONFIGURATION OR FAILURE REQUIRES IMMEDIATE ACTION", "THE FLIGHT CREW SHOULD BE AWARE OF THE CONFIGURATION OR FAILURE, BUT NEED NOT", "THE ITEM IS OPERATING NORMALLY.", "THESE ARE ACTIONS TO BE CARRIED OUT, OR LIMITATIONS."], answer: "THE FLIGHT CREW SHOULD BE AWARE OF THE CONFIGURATION OR FAILURE, BUT NEED NOT" },
+            { q: "IF A PARAMETER VALUE ON ANY SD PAGE IS NOT AVAILABLE FOR DISPLAY, AMBER CROSSES \"XX\" APPEAR INSTEAD OF THE VALUE.", options: ["TRUE", "FALSE"], answer: "TRUE" },
+            { q: "MASTER WARN LIGHTS ‐ LIGHT UP STEADY AMBER FOR A LEVEL 2 CAUTION ‐ ACCOMPANIED BY A SINGLE CHIME", options: ["TRUE", "FALSE"], answer: "FALSE" },
+            { q: "IF METRIC REFERENCE IS SELECTED ON THE FCU HAOW MANY ADDITIONAL SYMBOLS ARE DISPLAYED ON PFD", options: ["ONLY 1", "2", "3", "NONE"], answer: "2" },
+            { q: "RADIO HEIGHT QUANTITY APPEARS WHEN IT IS LESS THAN _______ FT", options: ["1000", "1500", "2000", "2500"], answer: "2500" },
+            { q: "LS MESSAGE FLASHES AMBER, WHEN THE APPR MODE IS ARMED AND THE ILS DISPLAY IS NOT SELECTED.", options: ["TRUE", "FALSE"], answer: "TRUE" },
+            { q: "CHECK ATT (AMBER) “CHECK ATT” APPEARS, WHEN THERE IS A DISAGREEMENT (OF A LEAST _? °) BETWEEN THE ATTITUDE INFORMATION DISPLAYED BY THE TWO PFDS. THE CHECK ATT FLAG APPEARS ON BOTH PFDS, AND A CAUTION APPEARS ON THE ECAM.", options: ["5", "10", "15", "20"], answer: "5" }
+        ],
+        landing_gear: [
+            // --- İLK METİN SORULARI (1-49) ---
+            { q: "The breaking system are : VOL-1 1.32.30 P4", options: ["Green with anti - skid, yellow without anti - skid, parking brake.", "Green or yellow with anti - skid, yellow without anti - skid, parking brake.", "Green with or without anti - skid, yellow without anti - skid, parking brake."], answer: "Green or yellow with anti - skid, yellow without anti - skid, parking brake." },
+            { q: "The anti - skid and nose wheel steering switch is set to off : VOL-1 1.32.30 P7", options: ["Nose wheel steering only is deactivated.", "Anti - skid and nose wheel steering are deactivated.", "Anti - skid provides a fixed aircraft deceleration.", "Anti - skid only is deactivated."], answer: "Anti - skid and nose wheel steering are deactivated." },
+            { q: "Maximum speed for landing gear retraction is :", options: ["200 KTS", "220 KTS", "250 KTS", "280 KTS"], answer: "220 KTS" },
+            { q: "The nose wheel steering is powered : VOL-1 1.32.20 P1", options: ["By the hydraulic system.", "By the electric system.", "A or B."], answer: "By the hydraulic system." },
+            { q: "Nose wheel steering is avaliable when : VOL-1 1.32.20 P1", options: ["Gear doors are open.", "Nose gear doors are closed.", "All gear doors are closed."], answer: "Nose gear doors are closed." },
+            { q: "Nose wheel steering is powered by : VOL-1 1.32.20 P1", options: ["Yellow hydraulic system.", "Green hydraulic system.", "Both A + B."], answer: "Green hydraulic system." },
+            { q: "When the pressure in the nose wheel steering system shut off : VOL-1 1.32.20 P1", options: ["With the towing lever in the towing position or both engines are shut down or aircraft speed is above 130 KTS.", "During ground towing with one engine shut down or when aircraft speed is above 60 KTS."], answer: "With the towing lever in the towing position or both engines are shut down or aircraft speed is above 130 KTS." },
+            { q: "The handwheels in the cockpit provide a wheel steering angle of : VOL-1 1.32.20 P1", options: ["85 degrees", "70 degrees", "75 degrees"], answer: "75 degrees" },
+            { q: "WHEN BOTH HANDWHEELS ARE OPERATED SIMULTANEOUSLY, THE SIGNALS : VOL-1 1.32.20 P1", options: ["FROM THE FIRST PILOT ACTING ON HIS HANDWHEEL HAVE PRIORITY.", "COMING FROM THE CAPTAIN HAVE PRIORITY.", "ARE ALGEBRAICALLY ADDED."], answer: "ARE ALGEBRAICALLY ADDED." },
+            { q: "THE BREAKING MODES ARE : VOL-1 1.32.30 P4", options: ["NORMAL WITH OR WITHOUT ANTI - SKID, ALTERNATE WITHOUT ANTI - SKID, PARKING BRAKE.", "NORMAL WITH ANTI - SKID, ALTERNATE WITHOUT ANTI - SKID, PARKING BRAKE.", "NORMAL OR ALTERNATE WITH ANTI - SKID, ALTERNATE WITHOUT ANTI - SKID, PARKING BRAKE."], answer: "NORMAL OR ALTERNATE WITH ANTI - SKID, ALTERNATE WITHOUT ANTI - SKID, PARKING BRAKE." },
+            { q: "NOSE WHEEL STEERING BY RUDDER PEDALS IS LIMITED TO : VOL-1 1.32.20 P1", options: ["2º TO 6º UNDER ALL CIRCUMSTANCES.", "2º TO 6º DEPENDING ON A/C SPEED."], answer: "2º TO 6º DEPENDING ON A/C SPEED." },
+            { q: "L/G POSITION IS INDICATED BY : VOL-1 1.32.10 P18,21", options: ["A PANEL ON THE CENTER INSTRUMENT PANEL, ECAM , VISUAL MEANS ON THE WING.", "A PANEL ON THE CENTER INSTRUMENT PANEL AND A PANEL ON THE OVERHEAD PANEL.", "ECAM ONLY.", "A PANEL ON THE CENTER INSTRUMENT PANEL AND ECAM."], answer: "A PANEL ON THE CENTER INSTRUMENT PANEL AND ECAM." },
+            { q: "NOSE WHEEL STEERING IS AVAILABLE FROM THE HANDWHEELS WHEN : VOL-1 1.32.20 P1", options: ["A/C SPEED IS BELOW 70 KTS, BOTH ENGINES RUNNING AND THE TOWING LEVER IS IN NORMAL POSITION WITH THE A/C ON GROUND.", "A/C SPEED IS BELOW 75 KTS, BOTH ENGINES RUNNING AND THE TOWING LEVER IS IN NORMAL POSITION WITH THE A/C ON GROUND OR IN THE AIR.", "A/C SPEED IS BELOW 70 KTS, ONE ENGINE RUNNING AND THE TOWING LEVER IS IN NORMAL POSITION WITH THE A/C ON GROUND."], answer: "A/C SPEED IS BELOW 70 KTS, ONE ENGINE RUNNING AND THE TOWING LEVER IS IN NORMAL POSITION WITH THE A/C ON GROUND." },
+            { q: "HYDRAULIC PRESSURE TO THE LANDING GEAR IS SUPPLIED UP TO : VOL-1 1.32.10 P3", options: ["280 KTS.", "ANY SPEED.", "260 KTS."], answer: "260 KTS." },
+            { q: "AFTER T/O THE LEFT MAIN GEAR SHOCK ABSORBER IS STUCK IN COMPRESSED POSITION : VOL-1 1.32.10 P9", options: ["THE GEAR CAN BE REACTED UNDER ALL CIRCUMSTANCES ( SAFETY ).", "THE GEAR CAN BE REACTED PROVIDED THE NOSE GEAR IS CENTERED.", "THE GEAR CAN NOT BE REACTED, GEAR LEVER IS BLOCKED."], answer: "THE GEAR CAN NOT BE REACTED, GEAR LEVER IS BLOCKED." },
+            { q: "IS IT POSSIBLE ( SYSTEM WISE ) TO LOWER THE GEAR BY GRAVITY ABOVE 260 KTS ? VOL-1 1.32.10 P4", options: ["YES.", "NO."], answer: "YES." },
+            { q: "ON THE SYSTEM PAGE \"WHEEL\" : L/G POSITION INDICATORS (TRIANGLES ), THE FIRST LINE SHOWS GREEN TRIANGLES ( GEAR DOWN ), THE SECOND LINE SHOWS NO TRIANGLES IS THE L/G DOWN ? VOL-1 1.32.10 P22", options: ["YES.", "NO."], answer: "YES." },
+            { q: "DURING AN APPROACH YOU GET MASTER WARNING AND ECAM : \"GEAR NOT DOWN I\" THE REASON IS : VOL-1 1.32.10 P23", options: ["L/G NOT DOWN LOCKED AND FLAPS AT FULL AND BOTH RADIO ALTIMETERS FAILED.", "L/G NOT DOWN LOCKED , FLAPS AT 3 AND RADIO HEIGHT LOWER THAN 750 FT.", "A. OR B."], answer: "A. OR B." },
+            { q: "THE BRAKES ARE ACTUATED BY TWO INDEPENDENT SYSTEMS, PRESSURIZED BY THE: VOL-1 1.32.30 P1", options: ["BLUE AND GREEN HYDRAULIC SYSTEM.", "YELLOW AND GREEN HYDRAULIC SYSTEM.", "BLUE AND YELLOW HYDRAULIC SYSTEM."], answer: "YELLOW AND GREEN HYDRAULIC SYSTEM." },
+            { q: "THE ALTERNATE BRAKE SYSTEM USES : VOL-1 1.32.30 P12", options: ["THE YELLOW HYDRAULIC SYSTEM.", "THE HYDRAULIC ACCUMLATOR ( PRESSURIZED ).", "A + B."], answer: "A + B." },
+            { q: "BRAKE PRESSURE FROM THE HYDRAULIC ACCUMLATOR IS STILL AVALIABLE : VOL-1 1.32.30 P5", options: ["IN NORMAL ( WITH ANTI - SKID )", "IN ALTERNATE ( WITH ANTI - SKID )", "IN ALTERNATE ( WITHOUT ANTI - SKID )"], answer: "IN ALTERNATE ( WITHOUT ANTI - SKID )" },
+            { q: "IN FLIGHT WITH THE PARKING BRK SET TO ON, A MESSAGE ON ECAM SHOWS PARK BRK : VOL-1 1.32.20 P1", options: ["IN GREEN.", "IN AMBER.", "IN BLUE."], answer: "IN AMBER." },
+            { q: "THE PRINCIPLE OF THE ANTI - SKID IS : VOL-1 1.32.30 P2", options: ["COMPANING THE SPEED DIFFERENCE BETWEEN THE FOUR WHEELS.", "COMPARING WHEEL SPEED WITH A/C REFERENCE SPEED.", "COMPARING WHEEL SPEEDS BETWEEN LEFT AND RIGHT LANDING GEAR."], answer: "COMPARING WHEEL SPEED WITH A/C REFERENCE SPEED." },
+            { q: "FOLLOWING FAILURE OF ADIRS 1 AND ADIRS 3, THE ANTI - SKID STILL AVALIABLE ? VOL-1 1.32.20 P1", options: ["YES.", "NO."], answer: "YES." },
+            { q: "WITH THE GREEN HYDRAULIC SYSTEM AVALIABLE, YOU FIND THE A/SKID AND N/W STRG IN OFF POSITION. VOL-1 1.32.30 P5", options: ["BRAKING IS NORMAL, NOSE WHEEL STEERING LOST.", "BRAKING IS ALTERNATE, NOSE WHEEL STEERING NORMAL.", "BRAKING IS ALTERNATE WITHOUT ANTI - SKID, NOSE WHEEL STEERING LOST."], answer: "BRAKING IS ALTERNATE WITHOUT ANTI - SKID, NOSE WHEEL STEERING LOST." },
+            { q: "ALTERNATE BRAKING USING THE YELLOW SYSTEM, AUTOBRAKE IS : VOL-1 1.32.30 P5", options: ["STILL AVALIABLE WITH ANTI - SKID.", "LOST.", "STILL AVALIABLE WITHOUT ANTI - SKID."], answer: "LOST." },
+            { q: "THE LANDING GEAR CAN BE EXTENDED BY : VOL-1 1.32.10 P3", options: ["GREEN HYDRAULIC SYSTEM OR MECHANICAL GRAVITY EXTENSION.", "GREEN HYDRAULIC OR YELLOW HYDRAULIC STSTEM IN STAND BY.", "GREEN HYDRAULIC SYSTEM FOR UNLOCKING, GRAVITY EXTENSION AND GREEN HYDRAULIC SYSTEM FOR DOWNLOCKING.", "BLUE HYDRAULIC SYSTEM OR MECHANICAL GRAVITY EXTENSION."], answer: "GREEN HYDRAULIC SYSTEM OR MECHANICAL GRAVITY EXTENSION." },
+            { q: "SETTING THE PARKING BRAKE ON, DEACTIVATES ALL BRAKING MODES, EXCEPT THE ANTI - SKID : VOL-1 1.32.30 P5", options: ["TRUE.", "FALSE."], answer: "FALSE." },
+            { q: "SETTING THE PARKING BRAKE TO ON, DEACTIVATES. THE AUTO BRAKE : VOL-1 1.32.30 P5", options: ["TRUE.", "FALSE."], answer: "FALSE." },
+            { q: "AUTOMATIC BRAKING IS INITIATED BY : VOL-1 1.32.30 P3", options: ["REVERSE THRUST SELECTION.", "GROUND SPOILERS EXTENTION.", "A + B."], answer: "GROUND SPOILERS EXTENTION." },
+            { q: "AFTER LANDING YOU RETRACT THE GROUND SPOILERS BY BRINGING THE THRUST LEVERS FROM REVERSE TO IDLE. THE AUTO BRAKE IS NOW DISARMED : VOL-1 1.32.30 P3", options: ["NO.", "YES."], answer: "YES." },
+            { q: "THE BRAKE AND ACCUMLATOR PRESSURE INDICATOR SHOWS PRESSURE : VOL-1 1.32.30 P7", options: ["FROM YELLOW THE HYDRAULIC SYSTEM.", "FROM THE ACCUMLATOR ONLY.", "FROM BOTH YELLOW BRAKE SYSTEM AND BRAKE ACCUMLATORS."], answer: "FROM BOTH YELLOW BRAKE SYSTEM AND BRAKE ACCUMLATORS." },
+            { q: "MAX BRAKING HAS BEEN SELECTED : TAKE OFF BEING ABORTED JUST BEFORE V 1 ENGINES IN REVERSE, YOU HAVE FORGOTTEN TO ARM THE GROUND SPOILERS, IS AUTOBRAKE ACTIVATED. VOL-1 1.32.30 P3", options: ["YES.", "NO."], answer: "YES." },
+            { q: "THE HOT LIGHT ON THE BRK FAN PUSH BUTTON COMES ON WHEN BRAKE TEMPERATURE REACHES : VOL-1 1.32.30 P11", options: ["250 c.", "300 c.", "315 c."], answer: "300 c." },
+            { q: "ON THE WHEEL PAGE OFF THE ECAM, AUTO BRK IS FLASHING GREEN : VOL-1 1.32.30 P11", options: ["AUTO BRAKE IS DISENGAGED.", "AUTO BRAKE FAILURE.", "ANTI - SKID FAILURE."], answer: "AUTO BRAKE IS DISENGAGED." },
+            { q: "ON THE WHEEL PAGE OF THE ECAM, A GREEN ARC APPEARS ON A WHEEL NUMBER IDENTIFICATION, MEANING THE BRAKE TEMPERATURE IS ABOVE : VOL-1 1.32.30 P11", options: ["300 degree", "100 degree", "50 degree"], answer: "100 degree" },
+            { q: "WHEN THE AUTO BRAKE OPERATES, IT CAN BE DISARMED BY : VOL-1 1.32.30 P3", options: ["GROUND SPOILERS RETRACTION.", "PRESSING THE MODE PUSH BUTTON OR LOOSING AN ARMING CONDITION.", "ACTION ON ONE 1 PEDAL IN MED OR LO MODE OR BOTH PEDALS IN MAX MODE.", "ANY : A, B OR C"], answer: "ANY : A, B OR C" },
+            { q: "AFTER LIFT OFF, IS BRAKES HOT WARNING ON ECAM STILL AVAILABLE : VOL-1 1.32.30 P13", options: ["YES, GEAR DOWN OR UP.", "YES, GEAR DOWN ONLY.", "NO."], answer: "YES, GEAR DOWN OR UP." },
+            { q: "ON THE RAMP WITH APU RUNNING, PARKING BRK IS SET ON. A MESSAGE ON THE ECAM SHOWS PARK BRK : VOL-1 1.32.30 P14", options: ["IN GREEN.", "NOTHING AT ALL.", "IN YELLOW ( BECAUSE OF ACCU PRESS )."], answer: "IN GREEN." },
+            { q: "AFTER A LANDING GEAR GRAVITY EXTENSION, IS IT POSSIBLE TO RESTORE NORMAL LANDING GEAR OPERATION IF GREEN HYDRAULIC PRESSURE IS AVAILABLE : VOL-1 1.32.10 P4", options: ["YES.", "NO."], answer: "YES." },
+            { q: "THE LANDING GEAR INDICATOR PANEL RECEIVES THE INFORMATION FROM MICROSWITCHES AND PROXIMITY DETECTORS CONECTED TO : VOL-1 1.32.10 P5", options: ["LGCIU 1.", "LGCIU 2.", "BOTH."], answer: "LGCIU 1." },
+            { q: "THE RED ARROW, NEAR THE LANDING GEAR LEVER COMES ON WHEN : VOL-1 1.32.10 P19", options: ["THE LANDING GEAR IS NOT DOWN LOCKED IN APPROACH CONFIG.", "THE LANDING GEAR IS NOT UPLOCKED AFTER RETRACTION.", "THE LANDING GEAR IN ABNORMAL POSITION."], answer: "THE LANDING GEAR IS NOT DOWN LOCKED IN APPROACH CONFIG." },
+            { q: "LDG GEAR INDICATOR PANEL UNLK LT COMES ON RED IF : VOL-1 1.32.10 P18", options: ["THE GEAR IS NOT LOCKED IN THE SELECTED POSITION.", "THE GEAR IS EXTENDED BY GRAVITY AND THE DOORS ARE NOT CLOSED.", "THE GEAR IS EXTENDED NORMALLY AND THE DOORS ARE NOT CLOSED."], answer: "THE GEAR IS NOT LOCKED IN THE SELECTED POSITION." },
+            { q: "THE MAX SPEED WITH LANDING GEAR EXTENDED (VLE ) IS :", options: ["300 KTS / M.70.", "280 KTS / M.67.", "260 KTS / M.60."], answer: "280 KTS / M.67." },
+            { q: "THE MAX SPEED AT WHICH THE LANDING GEAR MAY BE EXTENDED IS :", options: ["260 KTS.", "250 KTS.", "240 KTS."], answer: "250 KTS." },
+            { q: "WHICH ADIR 'S CLOSE THE SAFETY VALVE OF THE GREEN HYDRAULIC SUPPLY WHEN SPEED > 260 KTS : VOL-1 1.29.10 P6", options: ["ADIR 'S 1 AND 2.", "ADIR 'S 1 AND 3.", "ADIR 'S 2 AND 3."], answer: "ADIR 'S 1 AND 3." },
+            { q: "WHAT IS THE MAX TIRE SPEED :", options: ["205 KTS.", "195 KTS.", "185 KTS."], answer: "195 KTS." },
+            { q: "ARE THERE ANY VISUAL GEAR DOWN LOCK INDICATORS : VOL-1 1.32.10 P3", options: ["YES.", "NO."], answer: "NO." },
+            { q: "HOW MANY TURNS ARE NECESSARY TO EXTEND THE LANDING GEAR BY GRAVITY USING THE HANDCRANK : VOL-1 1.32.10 P20", options: ["TEN TURNS CLOCKWISE.", "FIVE TURNS CLOCKWISE.", "THREE TURNS CLOCKWISE."], answer: "THREE TURNS CLOCKWISE." },
+
+            // --- ANNEX SORULARI ---
+            { q: "Please answer based on the given image:", img: "annexes/landinggear/landinggear_annex1.png", options: ["A", "B", "C", "D"], answer: "A" },
+            { q: "Please answer based on the given image:", img: "annexes/landinggear/landinggear_annex2.png", options: ["A", "B", "C", "D"], answer: "D" },
+            { q: "Please answer based on the given image:", img: "annexes/landinggear/landinggear_annex3.png", options: ["A", "B", "C"], answer: "B" },
+            { q: "Please answer based on the given image:", img: "annexes/landinggear/landinggear_annex4.png", options: ["A", "B", "C", "D"], answer: "B" },
+            { q: "Please answer based on the given image:", img: "annexes/landinggear/landinggear_annex5.png", options: ["A", "B", "C"], answer: "C" },
+            { q: "Please answer based on the given image:", img: "annexes/landinggear/landinggear_annex6.png", options: ["A", "B", "C", "D"], answer: "B" },
+            { q: "Please answer based on the given image:", img: "annexes/landinggear/landinggear_annex7.png", options: ["A", "B", "C", "D"], answer: "C" },
+            { q: "Please answer based on the given image:", img: "annexes/landinggear/landinggear_annex8.png", options: ["A", "B", "C", "D"], answer: "B" },
+            { q: "Please answer based on the given image:", img: "annexes/landinggear/landinggear_annex9.png", options: ["A", "B", "C", "D"], answer: "A" },
+            { q: "Please answer based on the given image:", img: "annexes/landinggear/landinggear_annex10.png", options: ["A", "B", "C", "D"], answer: "D" },
+            { q: "Please answer based on the given image:", img: "annexes/landinggear/landinggear_annex11.png", options: ["A", "B", "C", "D"], answer: "A" },
+            { q: "Please answer based on the given image:", img: "annexes/landinggear/landinggear_annex12.png", options: ["A", "B", "C"], answer: "A" },
+            { q: "Please answer based on the given image:", img: "annexes/landinggear/landinggear_annex13.png", options: ["A", "B", "C", "D"], answer: "B" },
+            { q: "Please answer based on the given image:", img: "annexes/landinggear/landinggear_annex14.png", options: ["A", "B", "C"], answer: "C" },
+
+            // --- KALAN METİN SORULARI (64-87) ---
+            { q: "Nose wheel steering is powered by:", options: ["Yellow hydraulıc system", "Green hydraulıc system", "Both"], answer: "Yellow hydraulıc system" },
+            { q: "Two Landing Gear Control and Interface Units (LGCIUs) control the extension and retraction of the gear and the operation of the doors. They also supply information about the landing gear to ECAM for display, and send signals indicating whether the aircraft is in flight or on the ground to other aircraft systems.", options: ["True", "False"], answer: "True" },
+            { q: "Which of the statements is true?", options: ["The LGCIUs control the sequencing of gear and doors electrically. One LGCIU controls one complete gear cycle, then switches over automatically to the other LGCIU at the completion of the retraction cycle. It also switches over in case of failure.", "The LGCIUs control the sequencing of gear and doors electrically. One LGCIU controls the complete gear cycle, if a failure occur it switches over automatically to the other LGCIU."], answer: "The LGCIUs control the sequencing of gear and doors electrically. One LGCIU controls one complete gear cycle, then switches over automatically to the other LGCIU at the completion of the retraction cycle. It also switches over in case of failure." },
+            { q: "Which of the statements is true?", options: ["a) the green hydraulic system actuates all gear and doors. When the aircraft is flying faster than 260kt, a safety valve automatically cuts off hydraulic supply to the landing gear system.", "b) the yellow hydraulic system actuates all gear and doors. When the aircraft is flying faster than 260kt, a safety valve automatically cuts off hydraulic supply to the landing gear system.", "c) the green hydraulic system actuates all gear and doors. When the aircraft is flying faster than 250kt, a safety valve automatically cuts off hydraulic supply to the landing gear system.", "d) the yellow hydraulic system actuates all gear and doors. When the aircraft is flying faster than 250kt, a safety valve automatically cuts off hydraulic supply to the landing gear system."], answer: "a) the green hydraulic system actuates all gear and doors. When the aircraft is flying faster than 260kt, a safety valve automatically cuts off hydraulic supply to the landing gear system." },
+            { q: "Which of the statements is not true? If the normal system fails to extend the gear hydraulicaly, the flight crew can use a crank to extend it mechanically. When a crex member turns the crank, it;", options: ["Isolates the landing gear hydraulics from the green hydraulic system.", "Unlocks the landing gear doors and the main and nose main gear.", "Allows gravity to drop the gear into the extended position.", "Disconnects the autopilot."], answer: "Disconnects the autopilot." },
+            { q: "The flight crew can reset the emergency extension system in flight after using it for training (if green hydraulic pressure is available).", options: ["TRUE", "FALSE"], answer: "TRUE" },
+            { q: "Which hydraulic system(s) supply pressure to the landing gear system?", options: ["Green", "Blue", "Yellow and Blue", "Green and blue"], answer: "Green" },
+            { q: "With the A/SKID & N/W STRG switch in the ON position, if the BSCU detects a brake system malfunction and/or normal braking is not available:", options: ["Transition to the alternate brake system is automatic", "The crew will be notified with an ECAM message only if after touchdown the brake system does actually malfunction", "The crew must select alternate brakes", "Both A and B are correct"], answer: "Transition to the alternate brake system is automatic" },
+            { q: "When the landing gear is gravity extended, will nose wheel steering be available?", options: ["No", "Only if the A/SKID & N/W STRG switch is selected ON", "Limited nose wheel steering is available only through the captain's rudder pedals", "None of the above"], answer: "No" },
+            { q: "What is indicated by the autobrake DECEL lights?", options: ["Airplane deceleration is 25% of selected rate.", "Airplane deceleration is 50% of selected rate.", "Airplane deceleration is 100% of selected rate.", "Airplane deceleration is 80% of selected rate"], answer: "Airplane deceleration is 80% of selected rate" },
+            { q: "If the landing gear was gravity extended using the hand crank on the center pedestal, landing gear position must be verified through the", options: ["Landing gear indications depicted on the ECAM and, if available, the center panel LDG GEAR indicator panel lights", "The landing gear viewers", "Both A and B are correct", "None of the above"], answer: "Landing gear indications depicted on the ECAM and, if available, the center panel LDG GEAR indicator panel lights" },
+            { q: "If the accumulator on the alternate brake system is your only pressure source, which of the following will be available?", options: ["Auto brakes and anti-skid.", "Anti-skid.", "Seven applications of the brake pedals.", "3 applications of the brake pedals."], answer: "Seven applications of the brake pedals." },
+            { q: "On the ECAM WHEEL page, which of the following will NOT be displayed?", options: ["Brake system pressure", "Brake accumulator pressure", "Neither A or B"], answer: "Neither A or B" },
+            { q: "Auto brakes, if selected, will only be activated by:", options: ["the wheels spinning up", "the struts being compressed", "the brake pedals being depressed", "the ground spoiler extension command"], answer: "the ground spoiler extension command" },
+            { q: "The normal brake system uses .......... hydraulic pressure and the alternate brake system uses ............ hydraulic pressure backed up by the hydraulic brake accumulator.", options: ["Green, blue", "Yellow, blue", "Yellow, green", "Green, yellow"], answer: "Green, yellow" },
+            { q: "If the brake system automatically transitions to alternate brakes with the A/SKID & N/W STRG switch in the ON position, which of the following will be available?", options: ["Auto brakes and anti-skid", "Only auto brakes", "Anti-skid", "Brakes, auto brakes, anti-skid"], answer: "Anti-skid" },
+            { q: "Landing gear operation is inhibited at speeds:", options: ["below 100 knots", "above 260 +/- 5 knots", "below 100 knots and above 260 knots", "Above 300 knots"], answer: "above 260 +/- 5 knots" },
+            { q: "How can the brake accumulator be re-pressurized?", options: ["With the yellow electric hydraulic pump", "With the blue electric hydraulic pump", "AandB", "None of the above"], answer: "With the yellow electric hydraulic pump" },
+            { q: "If the Landing Gear was gravity extended using the hand crank on the center pedestal, what other systems will be inoperative?", options: ["Nose wheel steering", "Anti-skid and auto braking", "Nose wheel steering and anti-skid", "Nose wheel steering and auto braking"], answer: "Nose wheel steering" },
+            { q: "What is required to arm the auto brakes?", options: ["Green hydraulic pressure available, anti-skid, no failures in the braking system", "Landing gear lever selected down and selection of an autobraking rate", "Both A and B are required", "None of the above"], answer: "Green hydraulic pressure available, anti-skid, no failures in the braking system" },
+            { q: "Apply brakes with care, because initial pedal force or displacement produces more braking action in alternate mode than in normal mode. If antiskid is lost, modulate brake pressure at, or below :", options: ["1000 PSI", "2000 PSI", "3000 PSI", "500 PSI"], answer: "1000 PSI" },
+            { q: "Maintenance action is required in the following cases: ‐ The temperature difference between the 2 brakes on the same gear is greater than ……. °C, and the temperature of either one of the brakes is higher than, or equal to ……. °C, or", options: ["150 /600", "300/600", "250/500", "400/150"], answer: "150 /600" },
+            { q: "Maintenance action is required in the following cases: ‐ The temperature difference between the 2 brakes on the same gear is greater than ...... °C, and the temperature of one brake is lower than, or equal to ...... °C, or", options: ["150 /60", "30/60", "250/50", "200/150"], answer: "150 /60" },
+            { q: "Maintenance action is required in the following cases: . The difference between the average temperature of the left gear brakes and the average temperature of the right gear brakes is 200 °C or more, or", options: ["200", "300", "250", "500"], answer: "200" }
+        ],
+        lights: [
+            // --- İLK METİN SORULARI (1-2) ---
+            { q: "THE NO SMOKING, FASTEN SEAT BELT, RETURN TO SEAT AND EXIT SIGNS COME ON WHEN :", options: ["THE APPROPRIATE SWITCHES ARE ON AND/OR EXCESSIVE CABIN ALTITUDE IS DETECTED", "THE APPROPRIATE SWITCHES ARE OFF AND/OR EXCESSIVE CABIN ALTITUDE IS DETECTED", "ALL OF THE ABOVE"], answer: "THE APPROPRIATE SWITCHES ARE ON AND/OR EXCESSIVE CABIN ALTITUDE IS DETECTED" },
+            { q: "WITH THE EMER EXIT LT SELECTOR IN THE ARM POSITION, CABIN EMERGENCY LIGHTS AND EXIT SIGNS AUTOMATICALLY COME ON WHEN :", options: ["DC BUS FAILS", "AC BUS 2 FAILS", "AC ESSENTIAL BUS FAILS", "AC BUS 1 OR DC SHED ESSENTIAL BUS FAILS"], answer: "AC BUS 1 OR DC SHED ESSENTIAL BUS FAILS" },
+
+            // --- ANNEX SORULARI ---
+            { q: "Please answer based on the given image:", img: "annexes/lights/lights_annex1.png", options: ["A", "B", "C", "D"], answer: "D" },
+            { q: "Please answer based on the given image:", img: "annexes/lights/lights_annex2.png", options: ["A", "B", "C", "D"], answer: "A" },
+            { q: "Please answer based on the given image:", img: "annexes/lights/lights_annex3.png", options: ["A", "B", "C", "D"], answer: "B" },
+            { q: "Please answer based on the given image:", img: "annexes/lights/lights_annex4.png", options: ["A", "B", "C", "D"], answer: "A" },
+            { q: "Please answer based on the given image:", img: "annexes/lights/lights_annex5.png", options: ["A", "B", "C", "D"], answer: "A" },
+
+            // --- KALAN METİN SORULARI (8-15) ---
+            { q: "When only batteries are supplying all electrical power, which cockpit light is on line?", options: ["None", "The right-hand dome light", "The left-hand flood light", "The right-hand flood light"], answer: "The right-hand dome light" },
+            { q: "How many beacon lights is the A320 fitted with?", options: ["None", "One", "Two", "Three"], answer: "Two" },
+            { q: "The company logo lights are on:", options: ["Only on ground", "Only when slats are extended", "On ground or when flaps are extended at least 15 Deg", "Always"], answer: "On ground or when flaps are extended at least 15 Deg" },
+            { q: "If during gear retraction, the pilot forgets to switch off the nose lights:", options: ["They will switch off automatically", "They will remain on until landing", "The takeoff light will switch off automatically to avoid overheat", "There will be an ECAM reminder after 5 minutes"], answer: "They will switch off automatically" },
+            { q: "When the EMER EXIT LT selector is at ARM, the overhead emergency lighting will come on only if:", options: ["Normal aircraft electrical power system fails", "DC SHED ESS Bus fails or AC Bus 1 fails", "Answer A or AC SHED ESS Bus fails", "Answer A or B"], answer: "Answer A or B" },
+            { q: "The ECAM MEMO “LDG LT” appears in green. This means that:", options: ["At least one landing light is extended", "At least one landing light is on", "Both landing lights are extended", "Both landing lights are retracted"], answer: "At least one landing light is extended" },
+            { q: "The right dome light is supplied by:", options: ["HOT BAT Bus 1", "HOT BAT BUS 2", "Internal batteries", "DC ESS"], answer: "DC ESS" },
+            { q: "The Stby compass light is supplied by:", options: ["AC ESS BUS 1", "DC ESS BUS 2", "DC ESS BUS", "HOT BAT Bus"], answer: "DC ESS BUS" }
+        ],
+        oxygen: [
+            // --- İLK METİN SORULARI (1-8) ---
+            { q: "What happens when the mask is used with the selector at 100 % position ?", options: ["Mask is supplied with diluted oxygen on demand.", "Mask is supplied with undiluted on demand.", "Mask is supplied with undiluted oxygen continuous flow."], answer: "Mask is supplied with undiluted on demand." },
+            { q: "A thermal discharge of the crew oxygen bottle is indicated by :", options: ["A thermal discharge message on ecam.", "The green overboard disch indicator missing.", "The red overboard disch indicator missing.", "No indication of thermal discharge is provided."], answer: "The green overboard disch indicator missing." },
+            { q: "In the passenger oxygen system , a chemical oxygen generator , once activated , delivers oxygen for :", options: ["30 minutes , ıf only one mask is in use.", "5 minutes , ıf all masks are used.", "13 minutes, regardless of the number of the masks used."], answer: "13 minutes, regardless of the number of the masks used." },
+            { q: "In the cockpit, ıf the master selector of the evac command panel is in \"cap\" position and the purser presses his evac \"comd\"push button , what will happen ?", options: ["Evac signals are activated in the cabin only.", "All evac signals are activated.", "Evac signals are activated from the cocpit only."], answer: "Evac signals are activated from the cocpit only." },
+            { q: "The captain may call all cabin attendants at the same time :", options: ["TRUE", "FALSE"], answer: "TRUE" },
+            { q: "Where are the evac signals located ?", options: ["In the cockpit and next to forward left and AFT left cabin door.", "In the cocpit and next to each cabin door.", "In the cocpit and next to each cabin door and emergency overwing exit."], answer: "In the cockpit and next to forward left and AFT left cabin door." },
+            { q: "MASKS ARE SUPPLIED WITH UNDILUTED OXYGEN ON DEMAND- IF THE CABIN ALTITUDE RISES ABOVE 14000 FT, PASSENGER OXYGEN MASKS WILL DROP OUT.", options: ["ONLY BY ACTUATION OF A SWITCH ON THE CAPTAIN PANEL.", "AUTOMATICALLY BY CABIN PRESSURE AND/OR CABIN ATTENDANT ACTION.", "AUTOMATICALLY BY CABIN PRESSURE AND/OR FLIGHT CREW ACTION."], answer: "AUTOMATICALLY BY CABIN PRESSURE AND/OR FLIGHT CREW ACTION." },
+            { q: "STATE LOCATION OF THE \" EVAC COMMAND \" SWITCHES\":", options: ["PURSER STATION AND CABIN ATTENDANT AFT LEFT.", "PURSER STATION AND PILOT OVERHEAD PANEL.", "PILOT OVERHEAD PANEL AND ALL CABIN ATTENDANT STATION."], answer: "PURSER STATION AND PILOT OVERHEAD PANEL." },
+
+            // --- ANNEX SORULARI ---
+            { q: "Please answer based on the given image:", img: "annexes/oxygen/oxygen_annex1.png", options: ["A", "B", "C", "D"], answer: "B" },
+            { q: "Please answer based on the given image:", img: "annexes/oxygen/oxygen_annex2.png", options: ["A", "B", "C"], answer: "C" },
+            { q: "Please answer based on the given image:", img: "annexes/oxygen/oxygen_annex3.png", options: ["A", "B"], answer: "A" },
+            { q: "Please answer based on the given image:", img: "annexes/oxygen/oxygen_annex4.png", options: ["A", "B", "C"], answer: "B" },
+            { q: "Please answer based on the given image:", img: "annexes/oxygen/oxygen_annex5.png", options: ["A", "B", "C", "D"], answer: "C" },
+            { q: "Please answer based on the given image:", img: "annexes/oxygen/oxygen_annex6.png", options: ["A", "B", "C", "D"], answer: "B" },
+            { q: "Please answer based on the given image:", img: "annexes/oxygen/oxygen_annex7.png", options: ["A", "B", "C", "D"], answer: "A" },
+            { q: "Please answer based on the given image:", img: "annexes/oxygen/oxygen_annex8.png", options: ["A", "B", "C"], answer: "C" },
+            { q: "Please answer based on the given image:", img: "annexes/oxygen/oxygen_annex9.png", options: ["A", "B", "C", "D"], answer: "A" },
+
+            // --- KALAN METİN SORULARI (18-37) ---
+            { q: "On which ECAM page could the flight crew check the exact pressure of the oxygen cylinder?", options: ["The COND page", "The PRESS page", "The STATUS page", "The DOORS page"], answer: "The DOORS page" },
+            { q: "What is indicated by a missing green thermal plug during an exterior preflight?", options: ["An external fire discharge has been activated", "This is normal indication, the gren thermal plug only appears if the oxygen cylinder is low", "The crew oxygen bottle is empty", "An oxygen system overpressure or the thermal discharge"], answer: "An oxygen system overpressure or the thermal discharge" },
+            { q: "Approximately how long are the passenger oxygen generators able to produce oxygen?", options: ["30 minutes", "25 minutes", "20 minutes", "15 minutes"], answer: "15 minutes" },
+            { q: "What is the main difference between the crew and the passenger oxygen system?", options: ["Both the crew and passengers are supplied with oxygen from chemical oxygen generators", "The crew has an oxygen bottle for an emergency back-up supply", "There is no difference; both are served by oxygen cylinders", "Crew is supplied from an oxygen cylinder; passengers are supplied by chemical oxygen generators"], answer: "Crew is supplied from an oxygen cylinder; passengers are supplied by chemical oxygen generators" },
+            { q: "What is the purpose of the CREW SUPPLY push buton?", options: ["When selected to ON, it allows the flow of low pressure oxygen to the crew’s masks", "In case of low cylinder pressure it allows the crew to tap into the passenger oxygen system", "When selected to ON. İt supplies oxygen to the Captain & F/O only (jumpseats are not supplied)"], answer: "When selected to ON, it allows the flow of low pressure oxygen to the crew’s masks" },
+            { q: "What happens when the mask is used with the selection at %100 position?", options: ["Mask is supplied with undiluted oxygen on demand", "Mask is supplied with diluted oxygen on demand", "Mask is supplied with undiluted oxygen continuous flow", "Mask is not supplying any oxygen at all"], answer: "Mask is supplied with undiluted oxygen on demand" },
+            { q: "At approximately what cabin altitude should the passenger oxygen masks drop?", options: ["10,000 feet (+100, -500 ft)", "15,000 feet", "14,000 feet (+250, -750 ft)", "12,500 feet (+ or – 500 ft)"], answer: "14,000 feet (+250, -750 ft)" },
+            { q: "Illumination of the SYS ON light is an indication that:", options: ["The crew oxygen cylinder is empthy", "Electrical power has been sent to deploy the masks, either manually or automatically", "All of the passenger masks have deployed", "The crew must depress the MASK MAN ON pb in order to deploy the masks"], answer: "Electrical power has been sent to deploy the masks, either manually or automatically" },
+            { q: "There are oxygen generators in each aircraft’s galley", options: ["True", "False"], answer: "True" },
+            { q: "What will depressing the guarded MASK MAN ON pb accomplish?", options: ["It manually sends a signal to open the oxygen mask doors", "A signal is sent to the chemical oxygen generators to start the flow of oxygen to the masks", "Both are correct"], answer: "It manually sends a signal to open the oxygen mask doors" },
+            { q: "When does passenger oxygen flow start?", options: ["When cabin altitude exceeds 14,000 feet", "When the oxygen button is pushed", "When the oxygen doors open", "When the mask is pulled toward the seat"], answer: "When the mask is pulled toward the seat" },
+            { q: "Where is the oxygen blow out disk that is inspected during the pre-flight inspection?", options: ["Right forward fuselage", "Left forward fuselage", "Right backward fuselage", "Left backward fuselage"], answer: "Left forward fuselage" },
+            { q: "A Manual Release Tool (MRT) is available in the event a PSU door malfunction and must be manually opened. These are located at ________ .", options: ["Cockpit", "Forward Galley", "Backward Galley", "Under each flight attendants seat"], answer: "Under each flight attendants seat" },
+            { q: "If the crew supply pb is off, the word OXY will display _____________ on the DOOR/OXY ECAM page.", options: ["Red", "Green", "Amber", "White"], answer: "Amber" },
+            { q: "The Oxygen Cylinder is located in the ________________.", options: ["Cargo Compartment", "Tail", "Avionics Compartment", "Right side of the F/O seat"], answer: "Avionics Compartment" },
+            { q: "The cabin oxygen masks are released by a door that can be opened ____.", options: ["Automatically", "Manually by MASK MAN ON p/b", "With MRT", "All of the above"], answer: "All of the above" },
+            { q: "When a passenger mask is donned, most of the air the person receives is provided by the ambient cabin.", options: ["True", "False"], answer: "True" },
+            { q: "The cabin oxygen system is separate from the cockpit oxygen system.", options: ["True", "False"], answer: "True" },
+            { q: "On each oxygen mask stowage box, a _______________ will appear when oxygen is flowing to the mask.", options: ["Yellow Cross", "Green Line", "Red Circle", "Blue Cross"], answer: "Yellow Cross" },
+            { q: "The OXYGEN panel is located ______________________.", options: ["On the forward right side of the overhead panel", "On the forward left side of the overhead panel", "On the forward left side of the pedestal", "On the forward right side of the pedestal"], answer: "On the forward left side of the overhead panel" }
+        ]
+    };
+
+    // --- SİSTEM MANTIĞI ---
+    let currentUser = null;
+    let currentPool = [];
+    let currentIndex = 0;
+    let userAnswers = []; 
+    let currentTab = 'all';
+
+    // --- ZAMANLAYICI DEĞİŞKENLERİ ---
+    let quizStartTime = null;
+    let timerInterval = null;
+
+    window.onload = function() {
+        const savedUser = localStorage.getItem('sinav_user_v1');
+        if (savedUser) {
+            currentUser = savedUser;
+            updateUserInfo();
+            showPage('page-menu');
+            renderMistakeMenu();
+        } else {
+            showPage('page-login');
+        }
+
+        const uInput = document.getElementById("username-input");
+        if (uInput) {
+            uInput.addEventListener("keypress", function(event) {
+                if (event.key === "Enter") login();
+            });
+        }
+
+        document.addEventListener('keydown', function(event) {
+            if (!document.getElementById('page-quiz').classList.contains('active')) return;
+            if (event.key === "ArrowLeft") prevQuestion();
+            if (event.key === "ArrowRight") {
+                if (currentIndex < currentPool.length - 1) nextQuestion();
+            }
+            const keyMap = { '1': 0, '2': 1, '3': 2, '4': 3, '5': 4 };
+            if (keyMap.hasOwnProperty(event.key)) {
+                const index = keyMap[event.key];
+                const options = document.querySelectorAll('.option-card');
+                if (options[index]) options[index].click();
+            }
+        });
+    };
+
+    function showPage(id) {
+        document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+        
+        const pageEl = document.getElementById(id);
+        if (pageEl) pageEl.classList.add('active');
+        else console.error("HATA: HTML içinde '" + id + "' id'sine sahip bir div bulunamadı!");
+        
+        const infoPanel = document.getElementById('user-info-panel');
+        if (infoPanel) {
+            if (id === 'page-menu' || id === 'page-result') {
+                infoPanel.style.display = 'flex';
+            } else {
+                infoPanel.style.display = 'none';
+            }
+        }
+
+        if(id === 'page-menu') {
+            renderMistakeMenu(); 
+            
+            let db = getDB();
+            let totalAttempts = 0;
+            let totalCorrect = 0;
+
+            if (db[currentUser] && db[currentUser].stats) {
+                Object.values(db[currentUser].stats).forEach(stat => {
+                    totalAttempts += stat.total;
+                    totalCorrect += stat.correct;
+                });
+                db[currentUser].totalSolved = totalAttempts;
+                saveDB(db);
+            }
+            
+            let successRate = 0;
+            if (totalAttempts > 0) {
+                successRate = Math.round((totalCorrect / totalAttempts) * 100);
+            }
+
+            const totalEl = document.getElementById('total-solved-display');
+            const rateEl = document.getElementById('success-rate-display');
+            
+            if(totalEl) totalEl.textContent = totalAttempts;
+            if(rateEl) rateEl.textContent = `%${successRate}`;
+        }
+    }
+
+    function updateUserInfo() {
+        let name1 = document.getElementById('display-username');
+        let name2 = document.getElementById('display-username-quiz');
+        
+        if (name1) name1.textContent = currentUser;
+        if (name2) name2.textContent = currentUser;
+    }
+
+    function login() {
+        const val = document.getElementById('username-input').value.trim();
+        if(!val) return alert("Lütfen adınızı giriniz.");
+        currentUser = val;
+        localStorage.setItem('sinav_user_v1', val);
+        updateUserInfo();
+        showPage('page-menu');
+    }
+
+    function logout() {
+        if(confirm("Çıkış yapılsın mı?")) {
+            localStorage.removeItem('sinav_user_v1');
+            currentUser = null;
+            showPage('page-login');
+        }
+    }
+
+    function getDB() { return JSON.parse(localStorage.getItem('sinav_db_v1') || '{}'); }
+    function saveDB(data) { localStorage.setItem('sinav_db_v1', JSON.stringify(data)); }
+
+    function findQuestionCategory(qText) {
+        for (let category in courseData) {
+            if (courseData[category].some(x => x.q === qText)) return category;
+        }
+        return 'diger';
+    }
+
+    function updateStats(question, isCorrect) {
+        let db = getDB();
+        if(!db[currentUser]) db[currentUser] = { stats: {}, totalSolved: 0 };
+        if (typeof db[currentUser].totalSolved === 'undefined') db[currentUser].totalSolved = 0;
+        
+        const key = question.q;
+        if(!db[currentUser].stats[key]) {
+            const cat = findQuestionCategory(key);
+            db[currentUser].stats[key] = { total: 0, correct: 0, wrong: 0, qObj: question, category: cat };
+        }
+        
+        let stat = db[currentUser].stats[key];
+        stat.total++;
+        if(isCorrect) stat.correct++; else stat.wrong++;
+        stat.qObj = question;
+        db[currentUser].totalSolved++; 
+
+        saveDB(db);
+    }
+
+    function switchMistakeTab(tabName, btn) {
+        currentTab = tabName;
+        document.querySelectorAll('.stat-tab').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        renderMistakeMenu();
+    }
+
+    function renderMistakeMenu() {
+        let db = getDB();
+        let stats = db[currentUser] ? db[currentUser].stats : {};
+        let critical = [], warning = [], info = [];
+
+        Object.values(stats).forEach(item => {
+            if (currentTab !== 'all' && item.category !== currentTab) return;
+
+            if(item.wrong > 0) {
+                let rate = (item.correct / item.total) * 100;
+                if(rate < 50) critical.push(item.qObj);
+                else if(rate < 80) warning.push(item.qObj);
+                else info.push(item.qObj);
+            }
+        });
+
+        const container = document.getElementById('mistake-stats');
+        container.innerHTML = '';
+
+        if(critical.length > 0) container.innerHTML += `<button class="btn btn-danger" onclick="startMistakeQuiz('critical')">🔴 Kritik (${critical.length})</button>`;
+        if(warning.length > 0) container.innerHTML += `<button class="btn" style="color:#b45309; border-color:#fcd34d; background:#fffbeb;" onclick="startMistakeQuiz('warning')">🟠 Sık Hata (${warning.length})</button>`;
+        if(info.length > 0) container.innerHTML += `<button class="btn" style="color:#1e40af; border-color:#bfdbfe; background:#eff6ff;" onclick="startMistakeQuiz('info')">🔵 Nadir (${info.length})</button>`;
+        
+        if(critical.length===0 && warning.length===0 && info.length===0) container.innerHTML = '<span style="color:#94a3b8;">Bu kategoride henüz hata kaydı yok.</span>';
+    }
+
+    function startQuiz(type) {
+        returnPageId = 'page-menu';
+        let titleText = "";
+        let sourceData = [];
+
+        if (type === 'mix') {
+            titleText = "🔀 Karışık Test";
+            for (let key in courseData) {
+                sourceData.push(...courseData[key]);
+            }
+        } else if (courseData[type]) {
+            titleText = "📚 " + type.charAt(0).toUpperCase() + type.slice(1) + " Testi";
+            sourceData = courseData[type];
+        }
+
+        document.getElementById('quiz-title').textContent = titleText;
+        currentQuizTitle = titleText;
+
+        if (!sourceData || sourceData.length === 0) return alert("Soru bulunamadı.");
+        
+        currentPool = sourceData.map(q => {
+            let newQ = { ...q };
+            newQ.options = [...q.options].sort(() => Math.random() - 0.5);
+            return newQ;
+        });
+
+        currentPool.sort(() => Math.random() - 0.5);
+        initQuizUI();
+    }
+
+    function startMistakeQuiz(cat) {
+        returnPageId = 'page-menu';
+        let titleText = "";
+        if (cat === 'critical') titleText = "🔴 Kritik Hatalar";
+        else if (cat === 'warning') titleText = "🟠 Sık Yapılan Hatalar";
+        else if (cat === 'info') titleText = "🔵 Nadir Hatalar";
+        
+        document.getElementById('quiz-title').textContent = titleText;
+        currentQuizTitle = titleText;
+
+        let db = getDB();
+        let stats = db[currentUser] ? db[currentUser].stats : {}; 
+        let pool = [];
+        
+        if (stats) {
+            Object.values(stats).forEach(item => {
+                if (currentTab !== 'all' && item.category !== currentTab) return;
+
+                if(item.wrong > 0) {
+                    let rate = (item.correct / item.total) * 100;
+                    if(cat === 'critical' && rate < 50) pool.push(item.qObj);
+                    if(cat === 'warning' && rate >= 50 && rate < 80) pool.push(item.qObj);
+                    if(cat === 'info' && rate >= 80) pool.push(item.qObj);
+                }
+            });
+        }
+        
+        if(pool.length === 0) return alert("Bu kategoride soru yok.");
+
+        currentPool = pool.map(q => {
+            let newQ = { ...q };
+            newQ.options = [...q.options].sort(() => Math.random() - 0.5);
+            return newQ;
+        });
+
+        currentPool.sort(() => Math.random() - 0.5);
+        initQuizUI();
+    }
+
+    function updateTimer() {
+        if (!quizStartTime) return;
+        let elapsed = Math.floor((Date.now() - quizStartTime) / 1000); // Milisaniyeyi saniyeye çevir
+        let m = String(Math.floor(elapsed / 60)).padStart(2, '0');
+        let s = String(elapsed % 60).padStart(2, '0');
+        let timerEl = document.getElementById('quiz-timer');
+        if(timerEl) timerEl.textContent = `${m}:${s}`;
+    }
+
+    function initQuizUI() {
+        currentIndex = 0;
+        userAnswers = new Array(currentPool.length).fill(null);
+        showPage('page-quiz');
+        loadQuestion();
+        
+        // Zamanlayıcıyı başlat
+        quizStartTime = Date.now(); // Teste başladığımız anki gerçek saati al
+        if (timerInterval) clearInterval(timerInterval);
+        updateTimer(); // Ekrana ilk saniyeyi (00:00) hemen yaz
+        timerInterval = setInterval(updateTimer, 1000);
+    }
+
+    function loadQuestion() {
+        const q = currentPool[currentIndex];
+        
+        let qHTML = `${currentIndex+1}. ${q.q}`;
+        if (q.img) {
+            qHTML += `<br><img src="${q.img}" style="max-width:100%; max-height:400px; border-radius:8px; margin-top:15px; border:2px solid #e2e8f0; display:block; margin-left:auto; margin-right:auto;">`;
+        }
+        document.getElementById('q-text').innerHTML = qHTML;
+        document.getElementById('q-counter').textContent = `Soru ${currentIndex + 1} / ${currentPool.length}`;
+        document.getElementById('q-progress').style.width = `${((currentIndex+1)/currentPool.length)*100}%`;
+
+        const optsDiv = document.getElementById('q-options');
+        optsDiv.innerHTML = '';
+
+        q.options.forEach((opt, idx) => {
+            const btn = document.createElement('div');
+            btn.className = 'option-card';
+            const letter = String.fromCharCode(65 + idx); 
+            btn.innerHTML = `<span class="option-key-hint">${letter}</span> ${opt}`;
+            
+            btn.onclick = () => handleAnswer(opt, btn);
+            optsDiv.appendChild(btn);
+        });
+
+        if(userAnswers[currentIndex]) restoreState();
+        
+        document.getElementById('btn-prev').disabled = (currentIndex === 0);
+        document.getElementById('btn-next').textContent = (currentIndex === currentPool.length - 1) ? 'Bitir' : 'Sonraki →';
+        
+        renderFastAccess();
+    }
+
+    function handleAnswer(selected, btn) {
+        if(userAnswers[currentIndex]) return;
+
+        const q = currentPool[currentIndex];
+        const isCorrect = (selected === q.answer);
+        
+        userAnswers[currentIndex] = { selected, isCorrect, qObj: q };
+        
+        updateStats(q, isCorrect);
+        applyFeedback();
+        renderFastAccess();
+
+        const autoNext = document.getElementById('auto-next').checked;
+        if(isCorrect && autoNext) {
+            const allOpts = document.querySelectorAll('.option-card');
+            allOpts.forEach(o => o.style.pointerEvents = 'none');
+            
+            if (currentIndex < currentPool.length - 1) {
+                setTimeout(() => {
+                    nextQuestion();
+                }, 400); 
+            }
+        }
+    }
+
+    function applyFeedback() {
+        const ans = userAnswers[currentIndex];
+        if(!ans) return;
+        
+        const q = currentPool[currentIndex];
+        const opts = document.querySelectorAll('.option-card');
+        
+        opts.forEach(btn => {
+            btn.style.pointerEvents = 'none';
+            const btnText = btn.textContent.substring(2).trim();
+            
+            if(btnText === q.answer) {
+                btn.classList.add(ans.isCorrect ? 'correct' : 'hint');
+            }
+            if(btnText === ans.selected && !ans.isCorrect) {
+                btn.classList.add('incorrect');
+            }
+        });
+    }
+
+    function restoreState() { applyFeedback(); }
+
+    function renderFastAccess() {
+        const grid = document.getElementById('fast-access-grid');
+        grid.innerHTML = '';
+        
+        currentPool.forEach((_, i) => {
+            const btn = document.createElement('div');
+            btn.className = 'access-btn';
+            btn.textContent = i + 1;
+            
+            if (i === currentIndex) btn.classList.add('current');
+            
+            if (userAnswers[i]) {
+                if (userAnswers[i].isCorrect) btn.classList.add('correct');
+                else btn.classList.add('incorrect');
+            }
+            
+            btn.onclick = () => {
+                currentIndex = i;
+                loadQuestion();
+            };
+            grid.appendChild(btn);
+        });
+    }
+
+    function nextQuestion() {
+        if(currentIndex < currentPool.length - 1) {
+            currentIndex++;
+            loadQuestion();
+        } else {
+            finishQuiz();
+        }
+    }
+
+    function prevQuestion() {
+        if(currentIndex > 0) {
+            currentIndex--;
+            loadQuestion();
+        }
+    }
+
+    function endQuiz() {
+        if(confirm("Testi bitirmek istiyor musunuz?")) {
+            if (timerInterval) clearInterval(timerInterval); // Çıkarken sayacı durdur
+            showPage(returnPageId);
+        }
+    }
+
+    function finishQuiz() {
+        // Test bitince zamanlayıcıyı durdur ve sonucu hesapla
+        if (timerInterval) clearInterval(timerInterval);
+        let elapsed = Math.floor((Date.now() - quizStartTime) / 1000);
+        let m = String(Math.floor(elapsed / 60)).padStart(2, '0');
+        let s = String(elapsed % 60).padStart(2, '0');
+        let resTimeEl = document.getElementById('res-time-display');
+        if(resTimeEl) resTimeEl.textContent = `${m}:${s}`;
+
+        const correct = userAnswers.filter(a => a && a.isCorrect).length;
+        const score = Math.round((correct / currentPool.length) * 100);
+        
+        document.getElementById('res-score').textContent = `%${score}`;
+        
+        const circle = document.getElementById('result-circle');
+        circle.className = 'score-circle'; 
+        if(score >= 75) circle.classList.add('good');
+        else circle.classList.add('bad');
+
+        const msg = document.getElementById('res-msg');
+        if(score >= 90) msg.textContent = "Mükemmel! 🚀";
+        else if(score >= 75) msg.textContent = "Tebrikler, Geçtiniz! 👍";
+        else msg.textContent = "Tekrar Gerekli. 🧐";
+        
+        document.getElementById('res-test-title').textContent = currentQuizTitle;
+
+        const wrongOnes = userAnswers.filter(a => a && !a.isCorrect);
+        const retryBtn = document.getElementById('btn-retry-session');
+        
+        if(wrongOnes.length > 0) {
+            retryBtn.style.display = 'block';
+            retryBtn.textContent = `⚠️ Bu Testteki ${wrongOnes.length} Yanlışı Çöz`;
+        } else {
+            retryBtn.style.display = 'none';
+        }
+
+        showPage('page-result');
+    }
+
+    function restartQuiz() {
+        currentPool = currentPool.map(q => {
+            let newQ = { ...q };
+            newQ.options = [...q.options].sort(() => Math.random() - 0.5);
+            return newQ;
+        });
+        currentPool.sort(() => Math.random() - 0.5);
+        initQuizUI();
+    }
+
+    function retrySessionMistakes() {
+        const wrongs = userAnswers.filter(a => a && !a.isCorrect).map(a => a.qObj);
+        
+        currentPool = wrongs.map(q => {
+            let newQ = { ...q };
+            newQ.options = [...q.options].sort(() => Math.random() - 0.5);
+            return newQ;
+        });
+
+        currentPool.sort(() => Math.random() - 0.5);
+        initQuizUI();
+    }
+
+    function goBackToMenu() {
+        showPage(returnPageId);
+    }
+</script>
+</body>
+</html>
