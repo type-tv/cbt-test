@@ -124,6 +124,8 @@
             <button class="btn" onclick="startQuiz('landing_gear')">🛬 Landing Gear</button>
             <button class="btn" onclick="startQuiz('lights')">💡 Lights</button>
             <button class="btn" onclick="startQuiz('oxygen')">🤿 Oxygen & Emergency</button>
+            <button class="btn" onclick="startQuiz('instruments')">🎛️ Instruments</button>
+        </div>
         </div>
         <button class="btn btn-primary" style="width: 100%; margin-bottom: 20px;" onclick="startQuiz('mix')">🔀 Tüm Dersleri Karıştır</button>
         <div class="stats-card">
@@ -143,6 +145,8 @@
                 <div class="stat-tab" onclick="switchMistakeTab('landing_gear', this)">LANDING GEAR</div>
                 <div class="stat-tab" onclick="switchMistakeTab('lights', this)">LIGHTS</div>
                 <div class="stat-tab" onclick="switchMistakeTab('oxygen', this)">OXYGEN</div>
+                <div class="stat-tab" onclick="switchMistakeTab('instruments', this)">INSTRUMENTS</div>
+            </div>
             </div>
 
             
@@ -763,6 +767,29 @@
             { q: "The cabin oxygen system is separate from the cockpit oxygen system.", options: ["True", "False"], answer: "True" },
             { q: "On each oxygen mask stowage box, a _______________ will appear when oxygen is flowing to the mask.", options: ["Yellow Cross", "Green Line", "Red Circle", "Blue Cross"], answer: "Yellow Cross" },
             { q: "The OXYGEN panel is located ______________________.", options: ["On the forward right side of the overhead panel", "On the forward left side of the overhead panel", "On the forward left side of the pedestal", "On the forward right side of the pedestal"], answer: "On the forward left side of the overhead panel" }
+        ]
+        instruments: [
+            { q: "In case of PFDU failure, the PFD image will be transferred to the NDU :", options: ["Automatically.", "Either manually or automatically.", "Manually."], answer: "Automatically." },
+            { q: "What is the basic role of the DMC'S :", options: ["Generation of audio warnings.", "Generation of amber warnings.", "They generate the images to be displayed on DU's"], answer: "They generate the images to be displayed on DU's" },
+            { q: "What is the meaning of a diagonal line on a CRT :", options: ["Corrresponding CRT is not energized.", "Electrical supply is good and corresponding DMC failed.", "As in answer B. plus it is possible to get an image on again, by switching EIS DMC."], answer: "As in answer B. plus it is possible to get an image on again, by switching EIS DMC." },
+            { q: "Can you read amber warnings on the FMA part of your PFD : FCOM 1.22.30 P70", options: ["Yes.", "No."], answer: "Yes." },
+            { q: "Does the \"CHECK ATT \" message appear on both PFD's at the same time ? FCOM 1.31.40 P26", options: ["Yes.", "No."], answer: "Yes." },
+            { q: "During the aproach, FAC's calculate speed trend and VLS, The extremities of the trend vector or VLS segment indicates : speed value at the next 10 seconds and 1,23 VS1G after retraction of one step of flaps. Is this correct ?", options: ["Yes.", "No."], answer: "Yes." },
+            { q: "VLS indicator is inhibited :", options: ["During first 10 seconds after lift-off.", "With speed brakes extended.", "In both cases."], answer: "During first 10 seconds after lift-off." },
+            { q: "FAC'S compute VLS, S, F, shown on PFD according to the position of slats or/and flaps. Is the above statement correct :", options: ["Yes.", "No."], answer: "Yes." },
+            { q: "The amber altitude window appears, flashing :", options: ["When A/C goes below MDA.", "When A/C deviates from its selected altitude or selected FL.", "Both answers are correct."], answer: "When A/C deviates from its selected altitude or selected FL." },
+            { q: "If the upper ECAM display is lost, the engine warning display is automatically transferred to the lower ECAIM display. If the system display is required,you must :", options: ["Switch off the corresponding ECAIM display selector.", "Press and hold the relevant system push button.", "It is displayed automatically.", "Press the RCL button."], answer: "Press and hold the relevant system push button." },
+            { q: "The RA gives height on PFD : FCOM 1.31.40 P13", options: ["At the bottom of the attitude sphere.", "On the altitude scale .", "Both indications."], answer: "Both indications." },
+            { q: "On the horizon line you find a cyan HDG or TRK symbol, is your FD push button switched on : FCOM 1.31.40 P16", options: ["Yes.", "No."], answer: "No." },
+            { q: "Select the correct statement :", options: ["DMC 1 supplies data to PFD 1 - PFD 2.", "DMC 1 supplies data to PFD 1 - ND 1 - E/WD.", "DMC 1 supplies data to ND 1 - ND 2"], answer: "DMC 1 supplies data to PFD 1 - ND 1 - E/WD." },
+            { q: "When your FD bars flash :", options: ["Reversion to the AFS basic modes has occured.", "Alt capture is active and you select another FL.", "Loss of LOC or G/S in land mode or loss of land mode.", "A., B., C. are correct."], answer: "A., B., C. are correct." },
+            { q: "During take - off the FMA shows \"SRS\", what is the order of horizontal FD bar : FCOM 1.22.30 P47", options: ["Climb at V2 + 10 KT with both engines running.", "Climb at V2 vith both engines running."], answer: "Climb at V2 + 10 KT with both engines running." },
+            { q: "TRK - FPA is the selected mode for AFS, the internal FPV is normally on the horizon line. Could you see it in red colour : FCOM 1.31.40 P19", options: ["Yes.", "No."], answer: "No." },
+            { q: "Could you find on PFD HDG scale a space between green diamond and ILS course pointer : FCOM 1.31.40 P21", options: ["Yes.", "No."], answer: "Yes." },
+            { q: "Can you read optional data ( WPT or VOR. D, NDB...) on rose VOR or rose ILS : FCOM 1.31.45 P4 / P6", options: ["Yes.", "No."], answer: "No." },
+            { q: "With radar selected on , what can you read on ND about antenna setting : FCOM 1.31.45 P15", options: ["Tilt angle.", "Tilt angle + calibration mode."], answer: "Tilt angle + calibration mode." },
+            { q: "Which computer generates the red warnings :", options: ["FWC.", "DMC.", "SDAC."], answer: "FWC." },
+            { q: "What happens when ND shows red circle with \"MAP NOT AVAIL\" message : FCOM 1.31.45 P20", options: ["MCDU failure.", "A/C position delivered by FMGC is not valid.", "Engines not running."], answer: "A/C position delivered by FMGC is not valid." }
         ]
     };
 
