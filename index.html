@@ -105,50 +105,37 @@
             <button class="btn btn-primary" style="width:100%" onclick="login()">Giriş Yap</button>
         </div>
     </div>
-    <div id="page-menu" class="page">
-        <h2 style="color: #1e293b; margin-bottom: 20px;">Dersler</h2>
-        <div style="text-align: center; margin-bottom: 20px; font-weight: 600; color: #475569; background: #f1f5f9; padding: 10px; border-radius: 8px;">
-        🏆 Çözülen Soru: <span id="total-solved-display" style="color: var(--primary); font-size: 1.1rem; margin-right:5px;">0</span>
-        <span style="color:#cbd5e1">|</span>
-        ✅ Başarı Oranı: <span id="success-rate-display" style="color: var(--success); font-size: 1.1rem; margin-left:5px;">%0</span>
+    <div id="page-main-menu" class="page">
+        <h2 style="color: #1e293b; margin-bottom: 20px; text-align:center;">Sınav Seçimi</h2>
+        <div style="text-align: center; margin-bottom: 30px; font-weight: 600; color: #475569; background: #f1f5f9; padding: 15px; border-radius: 8px;">
+            🏆 Çözülen Soru: <span id="total-solved-display" style="color: var(--primary); font-size: 1.2rem; margin-right:10px;">0</span>
+            <span style="color:#cbd5e1">|</span>
+            ✅ Başarı Oranı: <span id="success-rate-display" style="color: var(--success); font-size: 1.2rem; margin-left:10px;">%0</span>
         </div>
-        <div class="grid-menu" id="dersler-menusu">
-            <button class="btn" onclick="startQuiz('apu')">⚙️ APU</button>
-            <button class="btn" onclick="startQuiz('communication')">📻 Communication</button>
-            <button class="btn" onclick="startQuiz('doors')">🚪 Doors</button>
-            <button class="btn" onclick="startQuiz('flight_controls')">✈️ Flight Controls</button>
-            <button class="btn" onclick="startQuiz('fire_protection')">🔥 Fire Protection</button>
-            <button class="btn" onclick="startQuiz('fuel')">⛽ Fuel</button>
-            <button class="btn" onclick="startQuiz('ice_and_rain')">❄️ Ice and Rain</button>
-            <button class="btn" onclick="startQuiz('indication')">🖥️ Indication / Recording</button>
-            <button class="btn" onclick="startQuiz('landing_gear')">🛬 Landing Gear</button>
-            <button class="btn" onclick="startQuiz('lights')">💡 Lights</button>
-            <button class="btn" onclick="startQuiz('oxygen')">🤿 Oxygen & Emergency</button>
-            <button class="btn" onclick="startQuiz('instruments')">🎛️ Instruments</button>
+        <div style="display:flex; flex-direction:column; gap:20px; max-width:400px; margin:0 auto; width:100%;">
+            <button class="btn btn-primary" style="font-size:1.2rem; padding:20px;" onclick="openExam('exam12')">📘 Exam I-II</button>
+            <button class="btn btn-primary" style="font-size:1.2rem; padding:20px; background:#0f766e; border-color:#0f766e;" onclick="openExam('exam3')">📗 Exam III</button>
+        </div>
+    </div>
+
+    <div id="page-menu" class="page">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 20px;">
+            <button onclick="showPage('page-main-menu')" style="background:none; border:none; color:#64748b; font-weight:bold; cursor:pointer; font-size:1rem; padding:0;">← Geri</button>
+            <h2 id="exam-title" style="color: #1e293b; margin: 0;">Exam</h2>
+            <div style="width:50px;"></div>
         </div>
         
-        <button class="btn btn-primary" style="width: 100%; margin-bottom: 20px;" onclick="startQuiz('mix')">🔀 Tüm Dersleri Karıştır</button>
+        <div class="grid-menu" id="dersler-menusu">
+            </div>
+        
+        <button class="btn btn-primary" style="width: 100%; margin-bottom: 20px;" onclick="startQuiz('mix')">🔀 Bu Gruptaki Tüm Dersleri Karıştır</button>
         
         <div class="stats-card">
             <div class="stats-header">
                 <div class="stats-title">📊 HATA ANALİZİ</div>
             </div>
             <div class="stats-tabs" id="hata-sekmeleri">
-                <div class="stat-tab active" onclick="switchMistakeTab('all', this)">GENEL</div>
-                <div class="stat-tab" onclick="switchMistakeTab('apu', this)">APU</div>
-                <div class="stat-tab" onclick="switchMistakeTab('communication', this)">COMM.</div>
-                <div class="stat-tab" onclick="switchMistakeTab('doors', this)">DOORS</div>
-                <div class="stat-tab" onclick="switchMistakeTab('flight_controls', this)">FLIGHT CONT.</div>
-                <div class="stat-tab" onclick="switchMistakeTab('fire_protection', this)">FIRE PROT.</div>
-                <div class="stat-tab" onclick="switchMistakeTab('fuel', this)">FUEL</div>
-                <div class="stat-tab" onclick="switchMistakeTab('ice_and_rain', this)">ICE & RAIN</div>
-                <div class="stat-tab" onclick="switchMistakeTab('indication', this)">INDICATION</div>
-                <div class="stat-tab" onclick="switchMistakeTab('landing_gear', this)">LANDING GEAR</div>
-                <div class="stat-tab" onclick="switchMistakeTab('lights', this)">LIGHTS</div>
-                <div class="stat-tab" onclick="switchMistakeTab('oxygen', this)">OXYGEN</div>
-                <div class="stat-tab" onclick="switchMistakeTab('instruments', this)">INSTRUMENTS</div>
-            </div>
-
+                </div>
             <div id="mistake-stats" style="display:flex; gap:10px; flex-wrap:wrap; min-height: 50px; align-items: center;">
                 <span style="color:#94a3b8; font-size:0.9rem;">Yükleniyor...</span>
             </div>
@@ -207,6 +194,7 @@
 <script>
     let returnPageId = 'page-menu'; 
     let currentQuizTitle = ''; 
+    let currentExamCategory = 'exam12';
     
     // --- VERİ HAVUZU ---
     const courseData = {
@@ -809,7 +797,50 @@
             { q: "Please answer based on the given image:", img: "annexes/instruments/instruments_annex18.png", options: ["A", "B"], answer: "A" },
             { q: "Please answer based on the given image:", img: "annexes/instruments/instruments_annex19.png", options: ["A", "B", "C", "D"], answer: "A" },
             { q: "Please answer based on the given image:", img: "annexes/instruments/instruments_annex20.png", options: ["A", "B", "C", "D"], answer: "D" }
-        ]
+        ],
+        // EXAM III DERSLERİ
+        air_condition: [],
+        auto_flight: [],
+        efis: [],
+        electrics: [],
+        fmgs: [],
+        special_airspace: [],
+        initial_low_vis: [],
+        pbn: [],
+        performance: [],
+        pneumatics: [],
+        power_plant: [],
+        sop_english: [],
+        sop_normal: []
+    };
+
+    const courseNames = {
+        apu: "⚙️ APU", communication: "📻 Communication", doors: "🚪 Doors",
+        flight_controls: "✈️ Flight Controls", fire_protection: "🔥 Fire Protection",
+        fuel: "⛽ Fuel", ice_and_rain: "❄️ Ice and Rain", indication: "🖥️ Indication",
+        landing_gear: "🛬 Landing Gear", lights: "💡 Lights", oxygen: "🤿 Oxygen & Emerg.",
+        instruments: "🎛️ Instruments",
+        air_condition: "🌬️ Air Cond. & Press.", auto_flight: "🤖 Auto Flight",
+        efis: "📺 EFIS", electrics: "⚡ Electrics", fmgs: "🧭 FMGS – Navigation",
+        special_airspace: "🛩️ Special Airspace", initial_low_vis: "🌫️ Initial Low Vis.",
+        pbn: "🛰️ PBN", performance: "📈 Performance", pneumatics: "💨 Pneumatics",
+        power_plant: "🔥 Power Plant", sop_english: "📘 SOP English", sop_normal: "📗 SOP – Normal Usuller"
+    };
+
+    const mistakeTabNames = {
+        apu: "APU", communication: "COMM.", doors: "DOORS", flight_controls: "FLT. CONT.",
+        fire_protection: "FIRE PROT.", fuel: "FUEL", ice_and_rain: "ICE&RAIN",
+        indication: "IND.", landing_gear: "LDG GEAR", lights: "LIGHTS",
+        oxygen: "OXY.", instruments: "INST.",
+        air_condition: "AIR COND", auto_flight: "AUTO FLT", efis: "EFIS",
+        electrics: "ELEC", fmgs: "FMGS", special_airspace: "SPC AIR",
+        initial_low_vis: "LOW VIS", pbn: "PBN", performance: "PERF",
+        pneumatics: "PNEU", power_plant: "PWR PLNT", sop_english: "SOP ENG", sop_normal: "SOP NRM"
+    };
+
+    const examGroups = {
+        exam12: ['apu', 'communication', 'doors', 'flight_controls', 'fire_protection', 'fuel', 'ice_and_rain', 'indication', 'landing_gear', 'lights', 'oxygen', 'instruments'],
+        exam3: ['air_condition', 'auto_flight', 'efis', 'electrics', 'fmgs', 'special_airspace', 'initial_low_vis', 'pbn', 'performance', 'pneumatics', 'power_plant', 'sop_english', 'sop_normal']
     };
 
     // --- SİSTEM MANTIĞI ---
@@ -828,8 +859,7 @@
         if (savedUser) {
             currentUser = savedUser;
             updateUserInfo();
-            showPage('page-menu');
-            renderMistakeMenu();
+            showPage('page-main-menu');
         } else {
             showPage('page-login');
         }
@@ -858,27 +888,21 @@
 
     function showPage(id) {
         document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
-        
         const pageEl = document.getElementById(id);
         if (pageEl) pageEl.classList.add('active');
-        else console.error("HATA: HTML içinde '" + id + "' id'sine sahip bir div bulunamadı!");
         
         const infoPanel = document.getElementById('user-info-panel');
         if (infoPanel) {
-            if (id === 'page-menu' || id === 'page-result') {
+            if (id === 'page-main-menu' || id === 'page-menu' || id === 'page-result') {
                 infoPanel.style.display = 'flex';
             } else {
                 infoPanel.style.display = 'none';
             }
         }
 
-        if(id === 'page-menu') {
-            renderMistakeMenu(); 
-            
+        if(id === 'page-main-menu') {
             let db = getDB();
-            let totalAttempts = 0;
-            let totalCorrect = 0;
-
+            let totalAttempts = 0, totalCorrect = 0;
             if (db[currentUser] && db[currentUser].stats) {
                 Object.values(db[currentUser].stats).forEach(stat => {
                     totalAttempts += stat.total;
@@ -887,18 +911,43 @@
                 db[currentUser].totalSolved = totalAttempts;
                 saveDB(db);
             }
-            
-            let successRate = 0;
-            if (totalAttempts > 0) {
-                successRate = Math.round((totalCorrect / totalAttempts) * 100);
-            }
-
+            let successRate = totalAttempts > 0 ? Math.round((totalCorrect / totalAttempts) * 100) : 0;
             const totalEl = document.getElementById('total-solved-display');
             const rateEl = document.getElementById('success-rate-display');
-            
             if(totalEl) totalEl.textContent = totalAttempts;
             if(rateEl) rateEl.textContent = `%${successRate}`;
+        } else if (id === 'page-menu') {
+            renderMistakeMenu();
         }
+    }
+
+    function openExam(examId) {
+        currentExamCategory = examId;
+        currentTab = 'all';
+
+        document.getElementById('exam-title').textContent = (examId === 'exam12') ? "Exam I-II" : "Exam III";
+
+        const grid = document.getElementById('dersler-menusu');
+        grid.innerHTML = '';
+        examGroups[examId].forEach(key => {
+            const btn = document.createElement('button');
+            btn.className = 'btn';
+            btn.innerHTML = courseNames[key];
+            btn.onclick = () => startQuiz(key);
+            grid.appendChild(btn);
+        });
+
+        const tabs = document.getElementById('hata-sekmeleri');
+        tabs.innerHTML = `<div class="stat-tab active" onclick="switchMistakeTab('all', this)">GENEL</div>`;
+        examGroups[examId].forEach(key => {
+            const tab = document.createElement('div');
+            tab.className = 'stat-tab';
+            tab.textContent = mistakeTabNames[key];
+            tab.onclick = function() { switchMistakeTab(key, this); };
+            tabs.appendChild(tab);
+        });
+
+        showPage('page-menu');
     }
 
     function updateUserInfo() {
@@ -915,7 +964,7 @@
         currentUser = val;
         localStorage.setItem('sinav_user_v1', val);
         updateUserInfo();
-        showPage('page-menu');
+        showPage('page-main-menu');
     }
 
     function logout() {
@@ -969,7 +1018,11 @@
         let critical = [], warning = [], info = [];
 
         Object.values(stats).forEach(item => {
-            if (currentTab !== 'all' && item.category !== currentTab) return;
+            if (currentTab === 'all') {
+                if (!examGroups[currentExamCategory].includes(item.category)) return;
+            } else {
+                if (item.category !== currentTab) return;
+            }
 
             if(item.wrong > 0) {
                 let rate = (item.correct / item.total) * 100;
@@ -996,18 +1049,18 @@
 
         if (type === 'mix') {
             titleText = "🔀 Karışık Test";
-            for (let key in courseData) {
+            examGroups[currentExamCategory].forEach(key => {
                 sourceData.push(...courseData[key]);
-            }
+            });
         } else if (courseData[type]) {
-            titleText = "📚 " + type.charAt(0).toUpperCase() + type.slice(1) + " Testi";
+            titleText = "📚 " + courseNames[type];
             sourceData = courseData[type];
         }
 
         document.getElementById('quiz-title').textContent = titleText;
         currentQuizTitle = titleText;
 
-        if (!sourceData || sourceData.length === 0) return alert("Soru bulunamadı.");
+        if (!sourceData || sourceData.length === 0) return alert("Bu ders için henüz soru eklenmemiş.");
         
         currentPool = sourceData.map(q => {
             let newQ = { ...q };
@@ -1035,7 +1088,11 @@
         
         if (stats) {
             Object.values(stats).forEach(item => {
-                if (currentTab !== 'all' && item.category !== currentTab) return;
+                if (currentTab === 'all') {
+                    if (!examGroups[currentExamCategory].includes(item.category)) return;
+                } else {
+                    if (item.category !== currentTab) return;
+                }
 
                 if(item.wrong > 0) {
                     let rate = (item.correct / item.total) * 100;
