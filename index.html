@@ -101,7 +101,7 @@
         <div class="login-wrapper">
             <h1 style="color: var(--primary); margin-bottom: 10px;">type.tv</h1>
             <p style="color: var(--secondary); margin-bottom: 30px;">Lütfen giriş yapın</p>
-            <input type="text" id="username-input" class="login-input" placeholder="Adınız">
+           <input type="text" id="username-input" class="login-input" placeholder="Adınız">
             <button class="btn btn-primary" style="width:100%" onclick="login()">Giriş Yap</button>
         </div>
     </div>
@@ -1307,21 +1307,17 @@
     let timerInterval = null;
 
     window.onload = function() {
-        const savedUser = localStorage.getItem('sinav_user_v1');
+        const savedUser = sessionStorage.getItem('sinav_user_v1'); // Oturum için session kullanıyoruz
         if (savedUser) {
             currentUser = savedUser;
             updateUserInfo();
-            showPage('page-main-menu');
+            checkSavedExamOrGoMenu(); // Direkt menüye gitme, yarım sınavı kontrol et
         } else {
             showPage('page-login');
         }
 
-        const uInput = document.getElementById("username-input");
-        if (uInput) {
-            uInput.addEventListener("keypress", function(event) {
-                if (event.key === "Enter") login();
-            });
-        }
+        cconst uInput = document.getElementById("username-input");
+        if (uInput) uInput.addEventListener("keypress", function(e) { if (e.key === "Enter") login(); });
 
         document.addEventListener('keydown', function(event) {
             if (!document.getElementById('page-quiz').classList.contains('active')) return;
@@ -1413,22 +1409,71 @@
     function login() {
         const val = document.getElementById('username-input').value.trim();
         if(!val) return alert("Lütfen adınızı giriniz.");
+        
         currentUser = val;
-        localStorage.setItem('sinav_user_v1', val);
+        sessionStorage.setItem('sinav_user_v1', val);
         updateUserInfo();
-        showPage('page-main-menu');
+        checkSavedExamOrGoMenu(); // Yarım kalan sınavı kontrol etme duruyor!
     }
 
     function logout() {
         if(confirm("Çıkış yapılsın mı?")) {
-            localStorage.removeItem('sinav_user_v1');
+            sessionStorage.removeItem('sinav_user_v1');
             currentUser = null;
+            document.getElementById('password-input').value = '';
             showPage('page-login');
         }
     }
 
+    function checkSavedExamOrGoMenu() {
+        const savedData = localStorage.getItem('saved_exam_state');
+        if (savedData) {
+            const state = JSON.parse(savedData);
+            if (state.user === currentUser) {
+                if (confirm("Yarım kalan bir sınavınız var. Kaldığınız yerden devam etmek ister misiniz?")) {
+                    currentQuizTitle = state.title;
+                    currentExamCategory = state.category;
+                    currentPool = state.pool;
+                    currentIndex = state.index;
+                    userAnswers = state.answers;
+                    quizStartTime = state.startTime || Date.now();
+                    
+                    document.getElementById('quiz-title').textContent = currentQuizTitle;
+                    showPage('page-quiz');
+                    loadQuestion();
+                    
+                    if (timerInterval) clearInterval(timerInterval);
+                    timerInterval = setInterval(updateTimer, 1000);
+                    return; // Normal menüye geçmesini engelle
+                } else {
+                    clearExamState(); // Devam etmediyse eskiyi sil
+                }
+            }
+        }
+        showPage('page-main-menu');
+    }
+
     function getDB() { return JSON.parse(localStorage.getItem('sinav_db_v1') || '{}'); }
     function saveDB(data) { localStorage.setItem('sinav_db_v1', JSON.stringify(data)); }
+
+    // --- YARIM KALAN SINAV KONTROLÜ ---
+    function saveExamState() {
+        if (!currentUser || !currentPool || currentPool.length === 0) return;
+        const state = {
+            user: currentUser,
+            title: currentQuizTitle,
+            category: currentExamCategory,
+            pool: currentPool,
+            index: currentIndex,
+            answers: userAnswers,
+            startTime: quizStartTime
+        };
+        localStorage.setItem('saved_exam_state', JSON.stringify(state));
+    }
+
+    function clearExamState() {
+        localStorage.removeItem('saved_exam_state');
+    }
 
     function findQuestionCategory(qText) {
         for (let category in courseData) {
@@ -1587,6 +1632,7 @@
         if (timerInterval) clearInterval(timerInterval);
         updateTimer(); // Ekrana ilk saniyeyi (00:00) hemen yaz
         timerInterval = setInterval(updateTimer, 1000);
+        saveExamState();
     }
 
     function loadQuestion() {
@@ -1632,6 +1678,7 @@
         updateStats(q, isCorrect);
         applyFeedback();
         renderFastAccess();
+        saveExamState();
 
         const autoNext = document.getElementById('auto-next').checked;
         if(isCorrect && autoNext) {
@@ -1695,6 +1742,7 @@
     function nextQuestion() {
         if(currentIndex < currentPool.length - 1) {
             currentIndex++;
+            saveExamState();
             loadQuestion();
         } else {
             finishQuiz();
@@ -1704,18 +1752,21 @@
     function prevQuestion() {
         if(currentIndex > 0) {
             currentIndex--;
+            saveExamState();
             loadQuestion();
         }
     }
 
     function endQuiz() {
         if(confirm("Testi bitirmek istiyor musunuz?")) {
-            if (timerInterval) clearInterval(timerInterval); // Çıkarken sayacı durdur
+            if (timerInterval) clearInterval(timerInterval);
+            clearExamState(); // Testten kendi isteğiyle çıkarsa kaydı sil
             showPage(returnPageId);
         }
     }
 
     function finishQuiz() {
+        clearExamState(); // Test bittiği için kaydı sil
         // Test bitince zamanlayıcıyı durdur ve sonucu hesapla
         if (timerInterval) clearInterval(timerInterval);
         let elapsed = Math.floor((Date.now() - quizStartTime) / 1000);
