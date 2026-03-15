@@ -1431,6 +1431,9 @@
             const state = JSON.parse(savedData);
             if (state.user === currentUser) {
                 if (confirm("Yarım kalan bir sınavınız var. Kaldığınız yerden devam etmek ister misiniz?")) {
+                    // Arka planda dönüş yapılacak menüyü gizlice oluştur:
+                    openExam(state.category);
+
                     currentQuizTitle = state.title;
                     currentExamCategory = state.category;
                     currentPool = state.pool;
