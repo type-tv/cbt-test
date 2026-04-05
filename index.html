@@ -1539,7 +1539,8 @@
             { q: "ELEC pb (on the ECAM Control Pane l) PRESS<br>BAT 1 pb-sw and BAT 2 pb-sw OFF then ON<br>This action initiates a charging cycle of the batteries. ( ) s after setting all BAT pb-sw ON, check on the ELEC SD page that the current charge of the battery is ( ) ( A), and is ( ).", options: ["20 , above , 26 , increasing", "30 , above , 60 , decreasing", "10 , below , 60 , decreasing", "20 , below , 26 , increasing"], answer: "10 , below , 60 , decreasing" },
             { q: "Do not engage the autothrust on ground, as it may generate the AUTO FLT A/THR OFF warning at engine start.", options: ["True", "False"], answer: "True" },
             { q: "If the ECAM does not display the N WHEEL STEERG DISC memo, but the ground crew confirms that the tow pin is in the towing position, the flight crew", options: ["should stop the engine start", "should stop the pushback", "should not start the engine during pushback", "should inform the ground personnel"], answer: "should not start the engine during pushback" }
-        ]
+        ],
+        hydraulics: []
     };
 
     const courseNames = {
@@ -1553,6 +1554,7 @@
         special_airspace: "🛩️ Special Airspace", initial_low_vis: "🌫️ Initial Low Vis.",
         pbn: "🛰️ PBN", performance: "📈 Performance", pneumatics: "💨 Pneumatics",
         power_plant: "🔥 Power Plant", sop_english: "📘 SOP English", sop_normal: "📗 SOP – Normal Usuller"
+        hydraulics: "🛢️ Hydraulics"
     };
 
     const mistakeTabNames = {
@@ -1563,11 +1565,11 @@
         air_condition: "AIR COND", auto_flight: "AUTO FLT", efis: "EFIS",
         electrics: "ELEC", fmgs: "FMGS", special_airspace: "SPC AIR",
         initial_low_vis: "LOW VIS", pbn: "PBN", performance: "PERF",
-        pneumatics: "PNEU", power_plant: "PWR PLNT", sop_english: "SOP ENG", sop_normal: "SOP NRM"
+        pneumatics: "PNEU", power_plant: "PWR PLNT", sop_english: "SOP ENG", sop_normal: "SOP NRM",hydraulics: "HYD"
     };
 
     const examGroups = {
-        exam12: ['apu', 'communication', 'doors', 'flight_controls', 'fire_protection', 'fuel', 'ice_and_rain', 'indication', 'landing_gear', 'lights', 'oxygen', 'instruments', 'efis'],
+        exam12: ['apu', 'communication', 'doors', 'flight_controls', 'fire_protection', 'fuel', 'ice_and_rain', 'indication', 'landing_gear', 'lights', 'oxygen', 'instruments', 'efis', 'hydraulics'],
         exam3: ['air_condition', 'auto_flight', 'electrics', 'fmgs', 'pneumatics', 'power_plant'],
         extra: ['special_airspace', 'initial_low_vis', 'pbn', 'performance', 'sop_english', 'sop_normal']
     };
