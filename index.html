@@ -115,6 +115,8 @@
         <div style="display:flex; flex-direction:column; gap:20px; max-width:400px; margin:0 auto; width:100%;">
             <button class="btn btn-primary" style="font-size:1.2rem; padding:20px;" onclick="openExam('exam12')">📘 Exam I-II</button>
             <button class="btn btn-primary" style="font-size:1.2rem; padding:20px; background:#0f766e; border-color:#0f766e;" onclick="openExam('exam3')">📗 Exam III</button>
+            <button class="btn btn-primary" style="font-size:1.2rem; padding:20px; background:#db2777; border-color:#db2777;" onclick="openExam('exam4')">📕 Exam IV</button>
+            <button class="btn btn-primary" style="font-size:1.2rem; padding:20px; background:#57534e; border-color:#57534e;" onclick="openExam('old')">🗄️ Old</button>
             <button class="btn btn-primary" style="font-size:1.2rem; padding:20px; background:#6366f1; border-color:#6366f1;" onclick="openExam('extra')">📙 Extra</button>
         </div>
     </div>
@@ -1621,7 +1623,13 @@
             { q: "Please answer based on the given image:", img: "annexes/hydraulic/hydraulic_annex9.png", options: ["A", "B", "C", "D"], answer: "A" },
             { q: "Please answer based on the given image:", img: "annexes/hydraulic/hydraulic_annex10.png", options: ["A", "B", "C", "D"], answer: "A" },
             { q: "Please answer based on the given image:", img: "annexes/hydraulic/hydraulic_annex11.png", options: ["A", "B", "C", "D"], answer: "A" }
-        ]
+        ],
+        single_answer: [],
+        phase5a: [],
+        ocr: [],
+        part_a_old: [],
+        part_b_old: [],
+        short_narrow_old: []
     };
 
     const courseNames = {
@@ -1635,7 +1643,8 @@
         special_airspace: "🛩️ Special Airspace", initial_low_vis: "🌫️ Initial Low Vis.",
         pbn: "🛰️ PBN", performance: "📈 Performance", pneumatics: "💨 Pneumatics",
         power_plant: "🔥 Power Plant", sop_english: "📘 SOP English", sop_normal: "📗 SOP – Normal Usuller",
-        hydraulics: "🛢️ Hydraulics"
+        hydraulics: "🛢️ Hydraulics", single_answer: "✅ Single Answer", phase5a: "🚀 Phase 5A", ocr: "📄 OCR",
+        part_a_old: "📁 Part A Old", part_b_old: "📁 Part B Old", short_narrow_old: "📏 Short & Narrow Old"
     };
 
     const mistakeTabNames = {
@@ -1646,12 +1655,16 @@
         air_condition: "AIR COND", auto_flight: "AUTO FLT", efis: "EFIS",
         electrics: "ELEC", fmgs: "FMGS", special_airspace: "SPC AIR",
         initial_low_vis: "LOW VIS", pbn: "PBN", performance: "PERF",
-        pneumatics: "PNEU", power_plant: "PWR PLNT", sop_english: "SOP ENG", sop_normal: "SOP NRM",hydraulics: "HYD"
+        pneumatics: "PNEU", power_plant: "PWR PLNT", sop_english: "SOP ENG", sop_normal: "SOP NRM",hydraulics: "HYD",
+        single_answer: "SGL ANS", phase5a: "PH 5A", ocr: "OCR",
+        part_a_old: "PART A", part_b_old: "PART B", short_narrow_old: "S&N OLD"
     };
 
     const examGroups = {
         exam12: ['apu', 'communication', 'doors', 'flight_controls', 'fire_protection', 'fuel', 'ice_and_rain', 'indication', 'landing_gear', 'lights', 'oxygen', 'instruments', 'efis', 'hydraulics'],
         exam3: ['air_condition', 'auto_flight', 'electrics', 'fmgs', 'pneumatics', 'power_plant'],
+        exam4: ['single_answer', 'phase5a', 'ocr'],
+        old: ['part_a_old', 'part_b_old', 'short_narrow_old'],
         extra: ['special_airspace', 'initial_low_vis', 'pbn', 'performance', 'sop_english', 'sop_normal']
     };
 
@@ -1733,7 +1746,11 @@
         currentExamCategory = examId;
         currentTab = 'all';
 
-        document.getElementById('exam-title').textContent = (examId === 'exam12') ? "Exam I-II" : (examId === 'exam3') ? "Exam III" : "Ekstra";
+        document.getElementById('exam-title').textContent = 
+            (examId === 'exam12') ? "Exam I-II" : 
+            (examId === 'exam3') ? "Exam III" : 
+            (examId === 'exam4') ? "Exam IV" : 
+            (examId === 'old') ? "Old Exams" : "Ekstra";
 
         const grid = document.getElementById('dersler-menusu');
         grid.innerHTML = '';
