@@ -2390,7 +2390,8 @@
             { q: "The crosswind limit for a 117 ft narrow runway based on GOOD braking conditions is _____ kts.", options: ["20", "21", "22", "23"], answer: "22" },
             { q: "Which one of the following is WRONG regarding narrow runway operations?", options: ["Take-off and landings may only be conducted by the Commander (seated in the left hand seat) or co-pilot (P3-P4 seated in the right hand seat).", "Narrow runway operations require special flight crew certification for runway widths of 30.0 m and above up to 40.0 m.", "Braking action shall be available and classified as “GOOD”.", "In case of commander (seated in the left hand seat) incapacitation, P5 (seated in the right hand seat) may continue the approach if he deems a safe, stabilized approach and landing can be made."], answer: "In case of commander (seated in the left hand seat) incapacitation, P5 (seated in the right hand seat) may continue the approach if he deems a safe, stabilized approach and landing can be made." },
             { q: "What is the cross wind limit for a 30m(97ft) narrow runway reported breaking action good to medium?", options: ["20", "23", "NO OPERATION", "15"], answer: "NO OPERATION" },
-            { q: "Normal operations require runway lengths of ______ ft. and greater.", options: ["5500ft", "6000ft", "6500ft", "7000ft"], answer: "6500ft" }
+            { q: "Normal operations require runway lengths of ______ ft. and greater.", options: ["5500ft", "6000ft", "6500ft", "7000ft"], answer: "6500ft" },
+        valid: []
         ]
     };
 
@@ -2406,7 +2407,8 @@
         pbn: "🛰️ PBN", performance: "📈 Performance", pneumatics: "💨 Pneumatics",
         power_plant: "🔥 Power Plant", sop_english: "📘 SOP English", sop_normal: "📗 SOP – Normal Usuller",
         hydraulics: "🛢️ Hydraulics", single_answer: "✅ Single Answer", phase5a: "🚀 Phase 5A", ocr: "📄 OCR",
-        part_a_old: "📁 Part A Old", part_b_old: "📁 Part B Old", short_narrow_old: "📏 Short & Narrow Old"
+        part_a_old: "📁 Part A Old", part_b_old: "📁 Part B Old", short_narrow_old: "📏 Short & Narrow Old",
+        valid: "✔️ Valid"
     };
 
     const mistakeTabNames = {
@@ -2419,13 +2421,14 @@
         initial_low_vis: "LOW VIS", pbn: "PBN", performance: "PERF",
         pneumatics: "PNEU", power_plant: "PWR PLNT", sop_english: "SOP ENG", sop_normal: "SOP NRM",hydraulics: "HYD",
         single_answer: "SGL ANS", phase5a: "PH 5A", ocr: "OCR",
-        part_a_old: "PART A", part_b_old: "PART B", short_narrow_old: "S&N OLD"
+        part_a_old: "PART A", part_b_old: "PART B", short_narrow_old: "S&N OLD",
+        valid: "VALID"
     };
 
     const examGroups = {
         exam12: ['apu', 'communication', 'doors', 'flight_controls', 'fire_protection', 'fuel', 'ice_and_rain', 'indication', 'landing_gear', 'lights', 'oxygen', 'instruments', 'efis', 'hydraulics'],
         exam3: ['air_condition', 'auto_flight', 'electrics', 'fmgs', 'pneumatics', 'power_plant'],
-        exam4: ['single_answer', 'phase5a', 'ocr'],
+        exam4: ['single_answer', 'phase5a', 'ocr', 'valid'],
         old: ['part_a_old', 'part_b_old', 'short_narrow_old'],
         extra: ['special_airspace', 'initial_low_vis', 'pbn', 'performance', 'sop_english', 'sop_normal']
     };
